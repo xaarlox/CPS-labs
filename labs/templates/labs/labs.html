@@ -61,13 +61,13 @@
                 <p>
                   Оцінка: {% if lab.best_score %}
                   <span style="color: var(--color-status-done)"
-                    >{{ lab.best_score }}/{{ lab.max_mark }}</span
+                    >{{ lab.best_mark }}/{{ lab.max_mark }}</span
                   >
                   {% else %}
                   <span style="opacity: 0.7">-</span>
                   {% endif %}
                 </p>
-                <p>Спроб: <span>{{ lab.attempts_count }}</span></p>
+                <p>Спроб: <span>{{ lab.attempts_left }}</span></p>
               </div>
               <div class="action-row">
                 {% if lab.status == 'completed' %}

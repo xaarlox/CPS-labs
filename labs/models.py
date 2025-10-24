@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+from users.models import Profile
 
 
 class Lab(models.Model):
@@ -25,7 +26,7 @@ class Lab(models.Model):
 
 class Submission(models.Model):
     lab = models.ForeignKey(Lab, on_delete=models.CASCADE, related_name='submissions')
-    # profile = 
+    profile = models.ForeignKey(Profile, null=True, blank=True, on_delete=models.CASCADE)
     status = models.CharField(max_length=100, default='not submitted')
     best_mark = models.FloatField(default=0, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -35,7 +36,7 @@ class Submission(models.Model):
 
 
     def __str__(self):
-        return f"Submission for {self.lab.title} by"
+        return f"Submission for {self.lab.title} by {self.profile.user.username}"
 
 
 class Attempt(models.Model):
