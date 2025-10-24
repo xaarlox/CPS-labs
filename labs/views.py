@@ -1,36 +1,47 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
-
-
-labList = [
-    {
-        'id': '1',
-        'title': 'Ecommerce Website',
-        'description': 'Fully functional ecommerce website'
-    },
-    {
-        'id': '2',
-        'title': 'Portfolio Website',
-        'description': 'A personal website to write articles and display work'
-    },
-    {
-        'id': '3',
-        'title': 'Social Network',
-        'description': 'An open source project built by the community'
-    }
-]
+from .models import Lab
+from .forms import LabForm
 
 
 def labs(request):
-    page = "labs"
-    number = 10
-    context = {'page': page, 'number': number, 'labs': labList}
+    labs = Lab.objects.all()
+    context = {'labs': labs}
     return render(request, 'labs/labs.html', context)
 
 
 def lab(request, pk):
-    labObj = None
-    for i in labList:
-        if i['id'] == pk:
-            labObj = i
+    labObj = Lab.objects.get(id=pk)
     return render(request, 'labs/single-lab.html', {'lab': labObj})
+
+
+def createLab(request):
+    form = LabForm()
+    if request.method == 'POST':
+        form = LabForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('labs')
+    context = {'form': form}
+    return render(request, "labs/lab_form.html", context)
+
+
+def updateLab(request, pk):
+    lab = Lab.objects.get(id=pk)
+    form = LabForm(instance=lab)
+    if request.method == 'POST':
+        form = LabForm(request.POST, instance=lab)
+        if form.is_valid():
+            form.save()
+            return redirect('labs')
+    context = {'form': form}
+    return render(request, "labs/lab_form.html", context)
+
+
+def deleteLab(request, pk):
+    lab = Lab.objects.get(id=pk)
+    if request.method == 'POST':
+        lab.delete()
+        return redirect('labs')
+    context = {'object': lab}
+    return render(request, 'labs/delete_template.html', context)

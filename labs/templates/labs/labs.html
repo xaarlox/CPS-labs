@@ -1,24 +1,22 @@
 {% extends 'main.html' %} {% block content %}
-
-<p>Hello! You are on the {{ page }} page</p>
-
-{% if number > 10 %}
-<p>Number is greater than 10</p>
-
-{% elif number == 10 %}
-<p>Number is exactly 10</p>
-
-{% else %}
-<p>Number is less than 10</p>
-{% endif %}
-
-<hr />
 <h1>Labs</h1>
-<ul>
+<table>
+  <tr>
+    <th>Lab</th>
+    <th>Passing Mark</th>
+    <th>Max Mark</th>
+    <th>Deadline</th>
+  </tr>
   {% for lab in labs %}
-  <li>
-    Title: <a href="/lab/{{lab.id}}">{{lab.title}}</a> --- {{lab.description}}
-  </li>
-  {% endfor %}
-</ul>
+  <tr>
+    <td>{{ lab.title }}</td>
+    <td>{{ lab.passing_mark }}</td>
+    <td>{{ lab.max_mark }}</td>
+    <td>{{ lab.deadline }}</td>
+    <td><a href="{% url 'update-lab' lab.id %}">Edit</a></td>
+    <td><a href="{% url 'delete-lab' lab.id %}">Delete</a></td>
+    <td><a href="{% url 'lab' lab.id %}">View</a></td>
+    {% endfor %}
+  </tr>
+</table>
 {% endblock content %}
