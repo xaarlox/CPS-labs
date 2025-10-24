@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>КФС Курс - Віртуальні Лабораторії</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'styles/home.css' %}" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="{% url 'labs' %}" class="logo"
+        ><span class="logo-notes">КФС</span
+        ><span class="logo-app">КУРС</span></a
+      >
+
+      <div class="cta-buttons">
+        <a href="login.html" class="btn btn-outline">Вхід</a>
+        <a href="login.html" class="btn btn-primary">Реєстрація</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <h1>
+        Опануйте кіберфізичні системи<br />
+        через віртуальні симуляції
+      </h1>
+      <p class="hero-subtitle">
+        Інтерактивні лабораторні роботи з курсу «Фізичні основи кіберфізичних
+        систем».
+      </p>
+      <div class="hero-cta">
+        <a href="login.html" class="btn btn-primary">Розпочати навчання</a>
+      </div>
+
+      <div class="visual-elements">
+        <img
+          src="{% static 'images/figure-left.png' %}"
+          alt="Left figure"
+          class="figure-left"
+        />
+        <img
+          src="{% static 'images/figure-right.png' %}"
+          alt="Right figure"
+          class="figure-right"
+        />
+        <img
+          src="{% static 'images/book1.png' %}"
+          alt="Pencil illustration"
+          class="pencil-img"
+        />
+        <img
+          src="{% static 'images/book11.png' %}"
+          alt="Notebook illustration"
+          class="book-img"
+        />
+      </div>
+    </section>
+  </body>
+</html>

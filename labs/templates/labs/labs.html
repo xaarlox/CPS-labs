@@ -1,22 +1,105 @@
-{% extends 'main.html' %} {% block content %}
-<h1>Labs</h1>
-<table>
-  <tr>
-    <th>Lab</th>
-    <th>Passing Mark</th>
-    <th>Max Mark</th>
-    <th>Deadline</th>
-  </tr>
-  {% for lab in labs %}
-  <tr>
-    <td>{{ lab.title }}</td>
-    <td>{{ lab.passing_mark }}</td>
-    <td>{{ lab.max_mark }}</td>
-    <td>{{ lab.deadline }}</td>
-    <td><a href="{% url 'update-lab' lab.id %}">Edit</a></td>
-    <td><a href="{% url 'delete-lab' lab.id %}">Delete</a></td>
-    <td><a href="{% url 'lab' lab.id %}">View</a></td>
-    {% endfor %}
-  </tr>
-</table>
-{% endblock content %}
+<!DOCTYPE html>
+{% load static %}
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'styles/labs.css' %}" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="#" class="logo">
+        <span class="logo-notes">КФС</span><span class="logo-app">КУРС</span>
+      </a>
+
+      <div class="user-menu-wrapper">
+        <div class="user-avatar-circle" title="Мій профіль">ІМ</div>
+        <div class="user-dropdown">
+          <a href="#"><span>Мій профіль</span></a>
+          <a href="{% url 'labs' %}"><span>Лабораторні</span></a>
+          <a href="#" class="logout"><span>Вийти</span></a>
+        </div>
+      </div>
+    </nav>
+    <div class="main-content">
+      <div class="labs-grid">
+        {% for lab in labs %}
+        <div class="lab-card lab-{{ forloop.counter}}">
+          <div class="lab-visual">
+            <svg
+              class="lab-icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"
+              ></path>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"
+              ></path>
+            </svg>
+          </div>
+          <div class="lab-content">
+            <h4>{{ lab.title }}</h4>
+            <p class="description">
+              {{ lab.description|default:"Опис відсутній" }}
+            </p>
+            <div class="lab-meta">
+              <div class="meta-info">
+                <p>
+                  Оцінка: {% if lab.best_score %}
+                  <span style="color: var(--color-status-done)"
+                    >{{ lab.best_score }}/{{ lab.max_mark }}</span
+                  >
+                  {% else %}
+                  <span style="opacity: 0.7">-</span>
+                  {% endif %}
+                </p>
+                <p>Спроб: <span>{{ lab.attempts_count }}</span></p>
+              </div>
+              <div class="action-row">
+                {% if lab.status == 'completed' %}
+                <span class="btn-lab-action btn-status-badge">Виконано</span>
+                <a href="lab1.html" class="btn-lab-action btn-action"
+                  >Повторити</a
+                >
+                {% elif lab.status == 'in progress' %}
+                <span class="btn-lab-action btn-status-badge">В процесі</span>
+                <a
+                  href="{% url 'lab' lab.id %}"
+                  class="btn-lab-action btn-action"
+                  >Продовжити</a
+                >
+                {% else %}
+                <span class="btn-lab-action btn-status-badge">Нова</span>
+                <a
+                  href="{% url 'lab' lab.id %}"
+                  class="btn-lab-action btn-action"
+                  >Розпочати</a
+                >
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p style="text-align: center; margin-top: 2rem">
+          Лабораторних робіт поки немає.
+        </p>
+        {% endfor %}
+      </div>
+    </div>
+  </body>
+</html>
