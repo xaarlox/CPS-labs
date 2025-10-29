@@ -14,9 +14,16 @@ class CustomUserCreationForm(UserCreationForm):
             'last_name': 'Прізвище',
             'username': 'Логін',
             'email': 'Електронна пошта',
-            'password1': 'Пароль',
-            'password2': 'Підтвердження пароля',
         }
+
+
+    def __init__(self, *args, **kwargs):
+        super(CustomUserCreationForm, self).__init__(*args, **kwargs)
+        self.fields['password1'].label = 'Пароль'
+        self.fields['password2'].label = 'Підтвердження пароля'
+
+        for name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'input', 'required': 'required', 'placeholder': ' '})
 
     
     def clean_email(self):
