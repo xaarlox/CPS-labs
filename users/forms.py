@@ -1,6 +1,7 @@
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .models import Profile
 from django.core.exceptions import ValidationError
 import re
 
@@ -43,4 +44,24 @@ class CustomUserCreationForm(UserCreationForm):
             raise ValidationError("Користувач із такою email-адресою вже існує.")
             
         return email
-        
+
+
+class ProfileForm(ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['name', 'username', 'academic_group', 'email', 'bio', 'profile_image', 'social_github']
+        labels = {
+            'name': 'Повне ім\'я',
+            'username': 'Логін',
+            'academic_group': 'Академічна група',
+            'email': 'Електронна пошта',
+            'bio': 'Про себе',
+            'profile_image': 'Фото профілю',
+            'social_github': 'GitHub',
+        }
+
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'input', 'placeholder': ' '})

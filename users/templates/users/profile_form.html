@@ -1,0 +1,189 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'styles/user.css' %}" />
+  </head>
+  <body>
+    <!-- Повідомлення -->
+    {% if messages %}
+    <div class="messages-container">
+      {% for message in messages %}
+      <div class="alert alert--{{ message.tags }}">
+        <p class="alert__message">{{ message }}</p>
+        <button class="alert__close">x</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <nav class="navbar">
+      <a href="{% url 'home' %}" class="logo">
+        <span class="logo-notes">КФС</span>
+        <span class="logo-app">КУРС</span>
+      </a>
+      <div class="user-menu-wrapper">
+        <div class="user-avatar-circle">
+          {% if user.profile.profile_image %}
+          <img
+            src="{{ user.profile.profile_image.url }}"
+            alt="Аватар"
+            class="avatar-img"
+          />
+          {% else %}
+          <img
+            src="{% static 'profiles/user-default.png' %}"
+            alt="Аватар за замовчуванням"
+            class="avatar-img"
+          />
+          {% endif %}
+        </div>
+        <div class="user-dropdown">
+          <a href="{% url 'edit-account' %}"><span>Мій профіль</span></a>
+          <a href="{% url 'labs' %}"><span>Лабораторні</span></a>
+          <a href="{% url 'logout' %}" class="logout"><span>Вийти</span></a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="content-wrapper">
+      <aside class="sidebar">
+        <div class="sidebar-header">Мій Профіль</div>
+        <nav class="nav-list">
+          <a href="#" class="active" data-section="profile"
+            >Редагувати профіль</a
+          >
+          <a href="#" data-section="account">Налаштування акаунту</a>
+        </nav>
+      </aside>
+
+      <main class="main-settings">
+        <!-- Профіль -->
+        <div id="profile-content" class="content-area">
+          <h2 class="settings-header">Редагування профілю</h2>
+
+          <!-- Фото профілю -->
+          <section class="form-section">
+            <h3 class="section-title">Фото профілю</h3>
+            <div class="avatar-area">
+              <form
+                id="avatar-form"
+                method="POST"
+                enctype="multipart/form-data"
+              >
+                {% csrf_token %}
+                <input type="hidden" name="update_avatar" value="1" />
+                <input
+                  type="file"
+                  id="avatar-upload-input"
+                  name="profile_image"
+                  accept="image/*"
+                  style="display: none"
+                />
+                <div
+                  class="user-avatar-display"
+                  title="Натисніть для зміни фото"
+                  onclick="document.getElementById('avatar-upload-input').click()"
+                >
+                  <div class="user-avatar-circle">
+                    {% if user.profile.profile_image %}
+                    <img
+                      src="{{ user.profile.profile_image.url }}"
+                      alt="Аватар"
+                      class="avatar-img"
+                    />
+                    {% else %}
+                    <img
+                      src="{% static 'profiles/user-default.png' %}"
+                      alt="Аватар за замовчуванням"
+                      class="avatar-img"
+                    />
+                    {% endif %}
+                  </div>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- Основні дані -->
+          <section class="form-section">
+            <h3 class="section-title">Основні дані</h3>
+            <form method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="update_profile" value="1" />
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="id_name">ПІБ</label>
+                  {{ form.name }}
+                </div>
+                <div class="form-group">
+                  <label for="id_username">Логін</label>
+                  {{ form.username }}
+                </div>
+                <div class="form-group">
+                  <label for="id_academic_group">Група</label>
+                  {{ form.academic_group }}
+                </div>
+                <div class="form-group">
+                  <label for="id_email">Електронна пошта</label>
+                  {{ form.email }}
+                </div>
+                <div class="form-group">
+                  <label for="id_social_github">GitHub</label>
+                  {{ form.social_github }}
+                </div>
+                <div class="form-group">
+                  <label for="bio">Про себе</label>
+                  {{ form.bio }}
+                </div>
+              </div>
+              <button type="submit" class="btn-save">Зберегти зміни</button>
+            </form>
+          </section>
+        </div>
+
+        <!-- Налаштування акаунту -->
+        <div id="account-content" class="content-area" style="display: none">
+          <h2 class="settings-header">Налаштування акаунту</h2>
+
+          <section class="form-section">
+            <h3 class="section-title">Зміна пароля</h3>
+            <form method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="change_password" value="1" />
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="{{ password_form.old_password.id_for_label }}"
+                    >Поточний пароль</label
+                  >
+                  {{ password_form.old_password }}
+                </div>
+                <div class="form-group">
+                  <label for="{{ password_form.new_password1.id_for_label }}"
+                    >Новий пароль</label
+                  >
+                  {{ password_form.new_password1 }}
+                </div>
+                <div class="form-group">
+                  <label for="{{ password_form.new_password2.id_for_label }}"
+                    >Підтвердження пароля</label
+                  >
+                  {{ password_form.new_password2 }}
+                </div>
+              </div>
+              <button type="submit" class="btn-save">Змінити пароль</button>
+            </form>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script src="{% static 'js/script.js' %}"></script>
+  </body>
+</html>

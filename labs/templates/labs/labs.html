@@ -12,16 +12,30 @@
   </head>
   <body>
     <nav class="navbar">
-      <a href="#" class="logo">
+      <a href="{% url 'home' %}" class="logo">
         <span class="logo-notes">КФС</span><span class="logo-app">КУРС</span>
       </a>
 
       <div class="user-menu-wrapper">
-        <div class="user-avatar-circle" title="Мій профіль">ІМ</div>
+        <div class="user-avatar-circle">
+          {% if user.profile.profile_image %}
+          <img
+            src="{{ user.profile.profile_image.url }}"
+            alt="Аватар"
+            class="avatar-img"
+          />
+          {% else %}
+          <img
+            src="{% static 'profiles/user-default.png' %}"
+            alt="Аватар за замовчуванням"
+            class="avatar-img"
+          />
+          {% endif %}
+        </div>
         <div class="user-dropdown">
-          <a href="#"><span>Мій профіль</span></a>
+          <a href="{% url 'edit-account' %}"><span>Мій профіль</span></a>
           <a href="{% url 'labs' %}"><span>Лабораторні</span></a>
-          <a href="#" class="logout"><span>Вийти</span></a>
+          <a href="{% url 'logout' %}" class="logout"><span>Вийти</span></a>
         </div>
       </div>
     </nav>
@@ -102,4 +116,5 @@
       </div>
     </div>
   </body>
+  <script src="{% static 'js/script.js' %}"></script>
 </html>

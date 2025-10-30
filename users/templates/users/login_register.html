@@ -5,13 +5,13 @@
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="{% static 'styles/login.css' %}" />
   </head>
-  {% if messages %} {% for message in messages %}
-  <div class="alert alert--{{ message.tags }}">
-    <p class="alert__message">{{message}}</p>
-    <button class="alert__close">x</button>
-  </div>
-  {% endfor %} {% endif %}
   <body>
+    {% if messages %} {% for message in messages %}
+    <div class="alert alert--{{ message.tags }}">
+      <p class="alert__message">{{message}}</p>
+      <button class="alert__close">x</button>
+    </div>
+    {% endfor %} {% endif %}
     <section>
       {% for i in "x"|rjust:150 %}
       <span></span>
@@ -81,6 +81,6 @@
         </div>
       </div>
     </section>
+    <script src="{% static 'js/script.js' %}"></script>
   </body>
-  <script src="{% static 'js/app.js' %}"></script>
 </html>
