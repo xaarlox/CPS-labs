@@ -51,9 +51,9 @@ class ProfileForm(ModelForm):
         model = Profile
         fields = ['name', 'username', 'academic_group', 'email', 'bio', 'profile_image', 'social_github']
         labels = {
-            'name': 'Повне ім\'я',
+            'name': 'Прізвище та ім\'я',
             'username': 'Логін',
-            'academic_group': 'Академічна група',
+            'academic_group': 'Група',
             'email': 'Електронна пошта',
             'bio': 'Про себе',
             'profile_image': 'Фото профілю',

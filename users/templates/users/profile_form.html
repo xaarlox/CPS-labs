@@ -118,30 +118,16 @@
               {% csrf_token %}
               <input type="hidden" name="update_profile" value="1" />
               <div class="form-grid">
+                {% for field in form %} {% if field.name != 'profile_image' %}
                 <div class="form-group">
-                  <label for="id_name">ПІБ</label>
-                  {{ form.name }}
+                  <label for="{{ field.id_for_label }}"
+                    >{{ field.label }}</label
+                  >
+                  {{ field }} {% if field.errors %}
+                  <span class="error">{{ field.errors }}</span>
+                  {% endif %}
                 </div>
-                <div class="form-group">
-                  <label for="id_username">Логін</label>
-                  {{ form.username }}
-                </div>
-                <div class="form-group">
-                  <label for="id_academic_group">Група</label>
-                  {{ form.academic_group }}
-                </div>
-                <div class="form-group">
-                  <label for="id_email">Електронна пошта</label>
-                  {{ form.email }}
-                </div>
-                <div class="form-group">
-                  <label for="id_social_github">GitHub</label>
-                  {{ form.social_github }}
-                </div>
-                <div class="form-group">
-                  <label for="bio">Про себе</label>
-                  {{ form.bio }}
-                </div>
+                {% endif %} {% endfor %}
               </div>
               <button type="submit" class="btn-save">Зберегти зміни</button>
             </form>
