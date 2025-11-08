@@ -106,32 +106,44 @@
                     />
                     {% endif %}
                   </div>
+                  <!-- Додаємо цей блок для відображення статусу -->
                 </div>
+                <div class="user-status" style="text-align: center; margin-top: 8px;">
+                    {% if user.profile.is_admin %}
+                        <span class="teacher" style="color: #1976d2; font-weight: bold;">Викладач</span>
+                    {% else %}
+                        <span class="student" style="color: #388e3c; font-weight: bold;">Студент</span>
+                    {% endif %}
+                  </div>
               </form>
             </div>
           </section>
 
           <!-- Основні дані -->
           <section class="form-section">
-            <h3 class="section-title">Основні дані</h3>
-            <form method="POST">
-              {% csrf_token %}
-              <input type="hidden" name="update_profile" value="1" />
-              <div class="form-grid">
-                {% for field in form %} {% if field.name != 'profile_image' %}
-                <div class="form-group">
-                  <label for="{{ field.id_for_label }}"
-                    >{{ field.label }}</label
-                  >
-                  {{ field }} {% if field.errors %}
-                  <span class="error">{{ field.errors }}</span>
-                  {% endif %}
+              <h3 class="section-title">Основні дані</h3>
+              <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="update_profile" value="1" />
+                <div class="form-grid">
+                  {% for field in form %}
+                    {% if field.name != 'profile_image' %}
+                      {% if field.name == 'academic_group' and user.profile.is_admin %}
+                      {% else %}
+                        <div class="form-group">
+                          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                          {{ field }}
+                          {% if field.errors %}
+                            <span class="error">{{ field.errors }}</span>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
                 </div>
-                {% endif %} {% endfor %}
-              </div>
-              <button type="submit" class="btn-save">Зберегти зміни</button>
-            </form>
-          </section>
+                <button type="submit" class="btn-save">Зберегти зміни</button>
+              </form>
+            </section>
         </div>
 
         <!-- Налаштування акаунту -->
