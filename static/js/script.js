@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
         targetSection === "account" ? "block" : "none";
     if (teacherContent)
       teacherContent.style.display =
-        targetSection === "account" ? "block" : "none";
+        targetSection === "teacher" ? "block" : "none";
   }
 
   navLinks.forEach((link) => {

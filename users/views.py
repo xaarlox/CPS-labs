@@ -113,7 +113,6 @@ def editAccount(request):
 
 @login_required(login_url='login')
 def usersList(request):
-    # доступ лише для викладача
     if not request.user.profile.is_admin:
         return redirect('edit-account')
 
