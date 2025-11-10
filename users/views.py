@@ -117,13 +117,3 @@ def editAccount(request):
         'users': users,
     }
     return render(request, 'users/profile_form.html', context)
-
-
-@login_required(login_url='login')
-def usersList(request):
-    if not request.user.profile.is_admin:
-        return redirect('edit-account')
-
-    users = Profile.objects.all().order_by('name')
-    context = {'users': users}
-    return render(request, 'users/profile_form.html', context)
