@@ -180,67 +180,65 @@
                 </section>
             </div>
 
+            <!--- Вивід усіх студентів -->
             {% if user.profile.is_admin %}
-            <div id="teacher-content" class="content-area" style="display: none">
-                <h3>Ця частина доступна тільки викладачу</h3>
-                {% if user.profile.is_admin %}
-                    <div id="teacher-content" class="content-area" style="display: none">
-                        <h2>Список користувачів</h2>
-                        <table class="user-list-table">
-                            <thead>
+                <div id="teacher-content" class="content-area" style="display: none">
+                    <h2>Список користувачів</h2>
+                    <table class="user-list-table">
+                        <thead>
+                            <tr>
+                                <th>Фото</th>
+                                <th>ПІБ</th>
+                                <th>Група</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>GitHub</th>
+                                <th>Тип</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user_item in users %}
                                 <tr>
-                                    <th>Фото</th>
-                                    <th>ПІБ</th>
-                                    <th>Група</th>
-                                    <th>Email</th>
-                                    <th>GitHub</th>
-                                    <th>Тип</th>
+                                    <td>
+                                        {% if user_item.profile_image %}
+                                            <img src="{{ user_item.profile_image.url }}" alt="avatar" width="40" height="40" style="border-radius: 50%;" />
+                                        {% else %}
+                                            <img src="{% static 'profiles/user-default.png' %}" alt="avatar" width="40" height="40" style="border-radius: 50%;" />
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user_item.name|default:user_item.username }}</td>
+                                    <td>
+                                        {% if user_item.academic_group %}
+                                            {{ user_item.academic_group.name }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user_item.username }}</td>
+                                    <td>{{ user_item.email }}</td>
+                                    <td>
+                                        {% if user_item.social_github %}
+                                            <a href="{{ user_item.social_github }}" target="_blank">{{ user_item.social_github }}</a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user_item.is_admin %}
+                                            <span style="color:#1976d2;font-weight:bold;">Викладач</span>
+                                        {% else %}
+                                            <span style="color:#388e3c;font-weight:bold;">Студент</span>
+                                        {% endif %}
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {% for user_item in users %}
-                                    <tr>
-                                        <td>
-                                            {% if user_item.profile_image %}
-                                                <img src="{{ user_item.profile_image.url }}" alt="avatar" width="40" height="40" style="border-radius: 50%;" />
-                                            {% else %}
-                                                <img src="{% static 'profiles/user-default.png' %}" alt="avatar" width="40" height="40" style="border-radius: 50%;" />
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ user_item.name|default:user_item.username }}</td>
-                                        <td>
-                                            {% if user_item.academic_group %}
-                                                {{ user_item.academic_group.name }}
-                                            {% else %}
-                                                —
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ user_item.email }}</td>
-                                        <td>
-                                            {% if user_item.social_github %}
-                                                <a href="{{ user_item.social_github }}" target="_blank">{{ user_item.social_github }}</a>
-                                            {% else %}
-                                                —
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if user_item.is_admin %}
-                                                <span style="color:#1976d2;font-weight:bold;">Викладач</span>
-                                            {% else %}
-                                                <span style="color:#388e3c;font-weight:bold;">Студент</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="6">Користувачів не знайдено.</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% endif %}
-            </div>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6">Користувачів не знайдено.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             {% endif %}
         </main>
     </div>

@@ -107,7 +107,15 @@ def editAccount(request):
         form = ProfileForm(instance=profile)
         password_form = PasswordChangeForm(user)
 
-    context = {'form': form, 'profile': profile, 'password_form': password_form}
+    users = None
+    if request.user.profile.is_admin:
+        users = Profile.objects.all().order_by('name')
+    context = {
+        'form': form,
+        'profile': profile,
+        'password_form': password_form,
+        'users': users,
+    }
     return render(request, 'users/profile_form.html', context)
 
 
@@ -118,4 +126,4 @@ def usersList(request):
 
     users = Profile.objects.all().order_by('name')
     context = {'users': users}
-    return render(request, 'users/users_list.html', context)
+    return render(request, 'users/profile_form.html', context)
