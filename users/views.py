@@ -5,6 +5,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .forms import CustomUserCreationForm, ProfileForm
+from .models import Profile
 
 
 def loginUser(request):
@@ -108,3 +109,14 @@ def editAccount(request):
 
     context = {'form': form, 'profile': profile, 'password_form': password_form}
     return render(request, 'users/profile_form.html', context)
+
+
+@login_required(login_url='login')
+def usersList(request):
+    # доступ лише для викладача
+    if not request.user.profile.is_admin:
+        return redirect('edit-account')
+
+    users = Profile.objects.all().order_by('name')
+    context = {'users': users}
+    return render(request, 'users/users_list.html', context)
