@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оптика: Правильні Кути</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --incident: #f72585; /* Рожевий промінь */
+            --reflected: #f8961e; /* Помаранчевий промінь */
+            --normal: #6c757d;
+            --text: #212529;
+            --bg-grad: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            --panel-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-grad);
+            color: var(--text);
+        }
+
+        #simCanvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+        }
+
+        /* UI PANEL */
+        .ui-panel {
+            position: absolute;
+            top: 50%; left: 30px;
+            transform: translateY(-50%);
+            width: 320px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header h2 { margin: 0 0 10px 0; font-size: 1.2rem; color: #333; }
+        .header p { margin: 0; font-size: 0.9rem; line-height: 1.5; color: #555; }
+
+        .highlight {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            padding: 2px 6px; border-radius: 4px; font-weight: 700;
+        }
+
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        .label-row { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; color: #444; }
+
+        input[type="range"] {
+            width: 100%; height: 6px;
+            background: #dee2e6; border-radius: 3px;
+            appearance: none; cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none; width: 18px; height: 18px;
+            border-radius: 50%; background: white;
+            border: 2px solid var(--primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+        }
+
+        .toggle-row {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.85rem; color: #666; cursor: pointer;
+            margin-top: 5px;
+        }
+        .toggle-row input { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
+
+        .answer-box {
+            background: #f8f9fa;
+            border: 2px dashed #ced4da;
+            border-radius: 12px;
+            padding: 15px; text-align: center;
+        }
+        .input-wrap {
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin: 10px 0;
+        }
+        input[type="number"] {
+            width: 70px; padding: 8px;
+            border: 1px solid #ced4da; border-radius: 8px;
+            text-align: center; font-size: 1.1rem; font-weight: bold; color: var(--primary);
+        }
+
+        .btn {
+            width: 100%; padding: 12px;
+            border: none; border-radius: 12px;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+            background: var(--primary); color: white;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.25);
+            transition: 0.2s;
+        }
+        .btn:hover { background: #304ffe; transform: translateY(-1px); }
+
+        .feedback {
+            margin-top: 10px; padding: 10px; border-radius: 8px;
+            font-size: 0.85rem; display: none;
+        }
+        .feedback.success { background: #d1fae5; color: #065f46; }
+        .feedback.error { background: #fee2e2; color: #991b1b; }
+
+        /* LEGEND */
+        .legend {
+            position: absolute; bottom: 20px; right: 20px;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(5px);
+            padding: 12px 20px; border-radius: 12px;
+            font-size: 0.8rem; pointer-events: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; color: #555; }
+        .line { width: 20px; height: 3px; border-radius: 2px; }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="simCanvas"></canvas>
+
+    <div class="ui-panel">
+        <div class="header">
+            <h2>Геометрична оптика</h2>
+            <p>
+                Дзеркало нахилене під кутом <span class="highlight" id="txt-phi">50°</span>.
+                Промінь падає під кутом <span class="highlight" id="txt-ray">90°</span>.
+                <br>Знайдіть кут <span style="color:var(--reflected); font-weight:bold;">γ</span> між відбитим променем і горизонтом.
+            </p>
+        </div>
+
+        <div class="control-group">
+            <div class="label-row">
+                <span>Кут дзеркала (φ)</span>
+                <span id="val-phi" style="color:var(--primary)">50°</span>
+            </div>
+            <input type="range" id="rng-phi" min="20" max="70" step="1" value="50">
+        </div>
+
+        <div class="control-group">
+            <div class="label-row">
+                <span>Кут променя (α)</span>
+                <span id="val-ray" style="color:var(--incident)">90°</span>
+            </div>
+            <input type="range" id="rng-ray" min="50" max="130" step="1" value="90">
+
+            <label class="toggle-row">
+                <input type="checkbox" id="chk-details" checked>
+                Показати деталі (α, β, нормаль)
+            </label>
+        </div>
+
+        <div class="answer-box">
+            <label style="font-size:0.85rem; font-weight:600; color:#666;">Ваша відповідь (γ):</label>
+            <div class="input-wrap">
+                <input type="number" id="inp-ans" placeholder="?">
+                <span style="font-size:1.1rem; font-weight:bold; color:#888;">°</span>
+            </div>
+            <button class="btn" onclick="checkAnswer()">Перевірити</button>
+            <div id="feedback" class="feedback"></div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="line" style="background:var(--incident);"></div> Падаючий</div>
+        <div class="legend-item"><div class="line" style="background:var(--reflected);"></div> Відбитий</div>
+        <div class="legend-item"><div class="line" style="background:var(--normal); height:1px; border-top:2px dashed var(--normal);"></div> Нормаль</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const state = {
+            phi: 50,
+            rayInc: 90,
+            trueGamma: 0,
+            showDetails: true
+        };
+
+        const els = {
+            phi: document.getElementById('rng-phi'),
+            ray: document.getElementById('rng-ray'),
+            chkDetails: document.getElementById('chk-details'),
+            valPhi: document.getElementById('val-phi'),
+            valRay: document.getElementById('val-ray'),
+            txtPhi: document.getElementById('txt-phi'),
+            txtRay: document.getElementById('txt-ray'),
+            ans: document.getElementById('inp-ans'),
+            feedback: document.getElementById('feedback')
+        };
+
+        function toRad(deg) { return deg * Math.PI / 180; }
+        function toDeg(rad) { return rad * 180 / Math.PI; }
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            draw();
+        }
+        window.addEventListener('resize', resize);
+
+        function draw() {
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            // --- КООРДИНАТИ СЦЕНИ ---
+            const floorY = h / 2 + 150;
+            // Зсув центру вліво, щоб вмістити промінь
+            const centerX = w * 0.35;
+
+            // Центр побудови (точка падіння на дзеркало)
+            const hitX = centerX;
+            const hitY = floorY - 180;
+
+            // 1. ЗЕМЛЯ
+            ctx.beginPath();
+            ctx.moveTo(0, floorY);
+            ctx.lineTo(w, floorY);
+            ctx.strokeStyle = '#343a40';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Штриховка землі
+            ctx.beginPath();
+            for(let i=0; i<w; i+=25) { ctx.moveTo(i, floorY); ctx.lineTo(i-10, floorY+10); }
+            ctx.strokeStyle = '#ced4da';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // 2. ДЗЕРКАЛО
+            const phiRad = toRad(state.phi);
+            const mx = Math.cos(phiRad);
+            const my = Math.sin(phiRad); // y позитивний вниз
+
+            // Обчислюємо низ дзеркала (перетин з підлогою)
+            // (floorY - hitY) / distBot = sin(phi) -> distBot = dy / sin
+            // Або простіше: зміщення по X
+            const dyBot = floorY - hitY;
+            const dxBot = dyBot / Math.tan(phiRad);
+
+            const mBotX = hitX + dxBot;
+            const mBotY = floorY;
+
+            // Верх дзеркала
+            const mTopX = hitX - mx * 150;
+            const mTopY = hitY - my * 150;
+
+            ctx.beginPath();
+            ctx.moveTo(mTopX, mTopY);
+            ctx.lineTo(mBotX, mBotY);
+            ctx.strokeStyle = '#212529';
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Штрихи дзеркала
+            ctx.beginPath();
+            const steps = 25;
+            const dx = (mBotX - mTopX) / steps;
+            const dy = (mBotY - mTopY) / steps;
+            const tickX = -my * 8;
+            const tickY = mx * 8;
+
+            for(let i=1; i<steps; i++) {
+                const px = mTopX + dx*i;
+                const py = mTopY + dy*i;
+                ctx.moveTo(px, py);
+                ctx.lineTo(px + tickX, py + tickY);
+            }
+            ctx.strokeStyle = '#adb5bd';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // --- КУТ ДЗЕРКАЛА (ФІ) - В ПРАВИЛЬНОМУ МІСЦІ ---
+            // Розміщуємо біля mBotX, mBotY (на землі)
+            // Кут йде від землі (PI) до дзеркала (PI + phi) в координатах canvas?
+            // Ні, дзеркало йде вліво-вгору. Вектор дзеркала (-mx, -my).
+            // Кут дзеркала відносно центру (mBot): PI + (PI-phi)?
+            // Простіше: Дуга від "Землі вліво" до "Дзеркала вгору".
+
+            // Вектор землі (ліво): Math.PI
+            // Вектор дзеркала (вверх-вліво): Math.atan2(mTopY - mBotY, mTopX - mBotX)
+            const angMirror = Math.atan2(mTopY - mBotY, mTopX - mBotX);
+            const angFloorLeft = Math.PI;
+
+            drawAngleSector(mBotX, mBotY, 50, angFloorLeft, angMirror, state.phi + "°", '#495057');
+
+
+            // 3. НОРМАЛЬ
+            const nx = Math.sin(phiRad);
+            const ny = -Math.cos(phiRad);
+
+            if (state.showDetails) {
+                ctx.beginPath();
+                ctx.setLineDash([6, 4]);
+                ctx.moveTo(hitX, hitY);
+                ctx.lineTo(hitX + nx * 100, hitY + ny * 100);
+                ctx.strokeStyle = '#6c757d';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // 4. ПАДАЮЧИЙ ПРОМІНЬ
+            const rayRad = toRad(state.rayInc);
+            const ix = Math.cos(rayRad);
+            const iy = Math.sin(rayRad);
+
+            const rayLen = 220;
+            drawLaser(hitX - ix*rayLen, hitY - iy*rayLen, hitX, hitY, '#f72585');
+
+            // 5. ВІДБИТИЙ ПРОМІНЬ
+            const dot = ix * nx + iy * ny;
+            const rx = ix - 2 * dot * nx;
+            const ry = iy - 2 * dot * ny;
+
+            const isBlocked = (dot >= 0);
+
+            if(!isBlocked) {
+                // Знаходимо точку перетину відбитого променя з землею
+                let groundHitX = 0;
+                let groundHitY = floorY;
+                let hitsFloor = false;
+
+                if (ry > 0.001) {
+                    // t = dy / ry
+                    const t = (floorY - hitY) / ry;
+                    groundHitX = hitX + rx * t;
+                    hitsFloor = true;
+                } else {
+                    // Якщо летить вгору - малюємо просто довго
+                    groundHitX = hitX + rx * 2000;
+                    groundHitY = hitY + ry * 2000;
+                }
+
+                drawLaser(hitX, hitY, groundHitX, groundHitY, '#f8961e');
+
+                // Кути Alpha / Beta біля точки падіння
+                const angNorm = Math.atan2(ny, nx);
+                const angIncInv = Math.atan2(-iy, -ix);
+                const angRef = Math.atan2(ry, rx);
+
+                if(state.showDetails) {
+                    drawAngleSector(hitX, hitY, 50, angNorm, angIncInv, 'α', '#f72585', true);
+                    drawAngleSector(hitX, hitY, 65, angRef, angNorm, 'β', '#f8961e', true);
+                }
+
+                // --- КУТ ГАММА (Y) - В ПРАВИЛЬНОМУ МІСЦІ ---
+                let gammaDeg = Math.abs(toDeg(angRef));
+                if(gammaDeg > 180) gammaDeg = 360 - gammaDeg;
+                if(gammaDeg > 90) gammaDeg = 180 - gammaDeg;
+                state.trueGamma = Math.round(gammaDeg);
+
+                if(hitsFloor && groundHitX < w + 150) {
+                    // Малюємо кут Y в точці перетину з землею (groundHitX)
+                    // Кут між "Землею вліво" і "Променем назад вгору"
+                    const angRayBack = Math.atan2(-ry, -rx);
+                    const angFloor = Math.PI;
+
+                    drawAngleSector(groundHitX, groundHitY, 60, angFloor, angRayBack, 'γ', '#f8961e');
+                } else {
+                    // Якщо промінь не перетинає землю на екрані
+                    // Малюємо допоміжну горизонталь біля дзеркала
+                    const horizLen = 80;
+                    ctx.beginPath();
+                    ctx.setLineDash([3, 3]);
+                    ctx.moveTo(hitX, hitY);
+                    ctx.lineTo(hitX + horizLen, hitY);
+                    ctx.strokeStyle = '#adb5bd';
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+            } else {
+                ctx.fillStyle = '#ef4444';
+                ctx.font = "bold 16px Segoe UI";
+                ctx.fillText("Промінь за дзеркалом", hitX + 20, hitY - 20);
+                state.trueGamma = null;
+            }
+        }
+
+        // --- ФУНКЦІЇ МАЛЮВАННЯ ---
+
+        function drawLaser(x1, y1, x2, y2, color) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 10;
+            ctx.stroke();
+
+            // Стрілка
+            const head = 12;
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const midX = x1 + (x2 - x1) * 0.6;
+            const midY = y1 + (y2 - y1) * 0.6;
+
+            ctx.beginPath();
+            ctx.moveTo(midX, midY);
+            ctx.lineTo(midX - head * Math.cos(angle - Math.PI/6), midY - head * Math.sin(angle - Math.PI/6));
+            ctx.lineTo(midX - head * Math.cos(angle + Math.PI/6), midY - head * Math.sin(angle + Math.PI/6));
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Універсальна функція для малювання сектора кута
+        function drawAngleSector(x, y, r, start, end, label, color, isSmall = false) {
+            // Нормалізація, щоб знайти найменший кут
+            let diff = end - start;
+            while (diff <= -Math.PI) diff += 2*Math.PI;
+            while (diff > Math.PI) diff -= 2*Math.PI;
+
+            ctx.beginPath();
+            ctx.arc(x, y, r, start, start + diff, diff < 0);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Заливка (дуже прозора)
+            ctx.lineTo(x, y);
+            ctx.fillStyle = color + (isSmall ? '15' : '20');
+            ctx.fill();
+
+            // Текст по бісектрисі
+            const mid = start + diff / 2;
+            const textR = r + 20;
+            const tx = x + textR * Math.cos(mid);
+            const ty = y + textR * Math.sin(mid);
+
+            ctx.fillStyle = color === '#495057' ? '#212529' : color;
+            ctx.font = "bold 15px Segoe UI";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(label, tx, ty);
+        }
+
+        // --- ЛОГІКА ---
+        function update() {
+            state.phi = parseFloat(els.phi.value);
+            state.rayInc = parseFloat(els.ray.value);
+            state.showDetails = els.chkDetails.checked;
+
+            els.valPhi.textContent = state.phi + "°";
+            els.valRay.textContent = state.rayInc + "°";
+            els.txtPhi.textContent = state.phi + "°";
+            els.txtRay.textContent = state.rayInc + "°";
+
+            els.feedback.style.display = 'none';
+            els.ans.value = '';
+
+            draw();
+        }
+
+        function checkAnswer() {
+            if (state.trueGamma === null) return;
+            const val = parseFloat(els.ans.value);
+            if (isNaN(val)) return;
+
+            if (Math.abs(val - state.trueGamma) <= 1) {
+                showFeedback('success', `✅ Правильно! γ = ${state.trueGamma}°`);
+            } else {
+                showFeedback('error', `❌ Помилка. Правильно: ${state.trueGamma}°`);
+            }
+        }
+
+        function showFeedback(type, text) {
+            els.feedback.className = `feedback ${type}`;
+            els.feedback.textContent = text;
+            els.feedback.style.display = 'block';
+        }
+
+        els.phi.addEventListener('input', update);
+        els.ray.addEventListener('input', update);
+        els.chkDetails.addEventListener('change', update);
+
+        resize();
+    </script>
+</body>
+</html>

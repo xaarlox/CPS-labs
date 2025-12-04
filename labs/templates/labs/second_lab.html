@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Симуляція: Закон Архімеда (Submerged)</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-grad: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --panel-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-grad);
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Картка задачі */
+        .problem-card {
+            background: var(--panel-bg);
+            border-radius: 16px;
+            padding: 20px 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+            margin-bottom: 20px;
+            border-left: 6px solid var(--primary);
+        }
+
+        .problem-text { font-size: 1.1rem; line-height: 1.5; }
+        .highlight { background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
+        /* Робоча зона */
+        .workspace {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1000px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Панель керування */
+        .controls-panel {
+            flex: 1;
+            min-width: 300px;
+            background: var(--panel-bg);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        h3 { margin-top: 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px; color: #475569; }
+
+        .control-group { margin-bottom: 15px; }
+        .label-row { display: flex; justify-content: space-between; font-weight: 500; margin-bottom: 5px; }
+        input[type="range"] { width: 100%; cursor: pointer; accent-color: var(--primary); }
+
+        /* Блок відповіді */
+        .answer-section {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 25px;
+            border: 2px dashed #94a3b8;
+            text-align: center;
+        }
+        .btn-check {
+            background: var(--primary); color: white; border: none; padding: 12px 24px;
+            border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;
+            width: 100%; margin-top: 10px; transition: 0.2s;
+        }
+        .btn-check:hover { background: #2563eb; }
+        .feedback { margin-top: 15px; padding: 10px; border-radius: 8px; font-size: 0.95rem; display: none; }
+        .feedback.success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+        .feedback.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+        /* Канвас */
+        .canvas-container {
+            flex: 1.5;
+            min-width: 350px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 10px;
+            position: relative;
+            cursor: grab;
+        }
+        .canvas-container:active { cursor: grabbing; }
+
+        canvas { width: 100%; height: auto; border-radius: 8px; display: block; }
+
+        .legend {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px; border-radius: 8px;
+            font-size: 0.85rem; pointer-events: none;
+        }
+        .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="problem-card">
+        <div style="text-transform: uppercase; font-size: 0.8rem; color: #64748b; margin-bottom: 5px;">Умова задачі</div>
+        <div class="problem-text">
+            Алюмінієвий циліндр (R = <span class="highlight">1 см</span>, h = <span class="highlight">5 см</span>) підвісили до пружини.
+            При <strong>повному зануренні</strong> у воду пружина розтяглась на <span class="highlight">1.0 см</span>.
+            <br>Визначте жорсткість пружини ($k$).
+        </div>
+    </div>
+
+    <div class="workspace">
+        <div class="controls-panel">
+            <h3>Параметри</h3>
+
+            <div class="control-group">
+                <div class="label-row"><label>Висота (h)</label> <span id="val_h">0.05 м</span></div>
+                <input type="range" id="rng_h" min="0.02" max="0.08" step="0.01" value="0.05">
+            </div>
+
+            <div class="control-group">
+                <div class="label-row"><label>Радіус (R)</label> <span id="val_R">0.01 м</span></div>
+                <input type="range" id="rng_R" min="0.005" max="0.03" step="0.005" value="0.01">
+            </div>
+
+            <div class="control-group">
+                <div class="label-row"><label>Густина тіла (ρ)</label> <span id="val_rho">2700 кг/м³</span></div>
+                <input type="range" id="rng_rho" min="1500" max="8000" step="100" value="2700">
+            </div>
+
+            <div class="control-group">
+                <div class="label-row"><label>Розтяг (x) при рівновазі</label> <span id="val_x">0.01 м</span></div>
+                <input type="range" id="rng_x" min="0.005" max="0.03" step="0.001" value="0.01">
+                <div style="font-size: 0.8rem; color: #64748b; margin-top: 5px;">*Змінює жорсткість пружини</div>
+            </div>
+
+            <div class="answer-section">
+                <label style="display:block; font-weight: 600; margin-bottom: 10px;">Введіть відповідь ($k$):</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="number" id="inp_user_k" placeholder="?" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                    <strong>Н/м</strong>
+                </div>
+                <button class="btn-check" onclick="checkAnswer()">Перевірити</button>
+                <div id="feedback-msg" class="feedback"></div>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <div class="legend">
+                <div class="legend-item"><div class="dot" style="background: #ef4444;"></div>mg (Тяжіння)</div>
+                <div class="legend-item"><div class="dot" style="background: #3b82f6;"></div>Fa (Архімеда)</div>
+                <div class="legend-item"><div class="dot" style="background: #10b981;"></div>Fпр (Пружності)</div>
+            </div>
+            <canvas id="simCanvas" width="500" height="600"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- Константи та Стан ---
+        const CONSTANTS = {
+            g: 10,
+            rho_water: 1000,
+            scalePx: 3500,     // Масштаб: пікселів у метрі (збільшено для наочності)
+            waterLevelY: 180,  // Рівень води (високо, щоб тіло було занурене)
+            springTopY: 30     // Точка підвісу пружини
+        };
+
+        let simState = {
+            y: 0,       // Зміщення від точки рівноваги вільної пружини
+            vy: 0,      // Швидкість
+            isDragging: false,
+            dragOffsetY: 0,
+            time: 0
+        };
+
+        // Inputs DOM Elements
+        const inputs = {
+            h: document.getElementById('rng_h'),
+            R: document.getElementById('rng_R'),
+            rho: document.getElementById('rng_rho'),
+            x: document.getElementById('rng_x')
+        };
+        const displays = {
+            h: document.getElementById('val_h'),
+            R: document.getElementById('val_R'),
+            rho: document.getElementById('val_rho'),
+            x: document.getElementById('val_x')
+        };
+
+        // --- Фізика ---
+        function getParams() {
+            return {
+                h: parseFloat(inputs.h.value),
+                R: parseFloat(inputs.R.value),
+                rho: parseFloat(inputs.rho.value),
+                x_target: parseFloat(inputs.x.value) // Це "дано" - на скільки розтягнулась пружина
+            };
+        }
+
+        function updatePhysics() {
+            const p = getParams();
+
+            // Оновлення текстових значень
+            displays.h.innerText = p.h + " м";
+            displays.R.innerText = p.R + " м";
+            displays.rho.innerText = p.rho + " кг/м³";
+            displays.x.innerText = p.x_target + " м";
+
+            // 1. Розрахунок маси та об'єму
+            const V = Math.PI * p.R * p.R * p.h;
+            const m = p.rho * V;
+
+            // 2. Розрахунок жорсткості k (виходячи з умови задачі)
+            // Умова рівноваги у воді: k * x = mg - Fa
+            // Fa (max) = rho_water * g * V
+            const Fa_max = CONSTANTS.rho_water * CONSTANTS.g * V;
+            const Fg = m * CONSTANTS.g;
+
+            // k розраховується так, щоб при повному зануренні розтяг дорівнював заданому x_target
+            let k = 100;
+            if (p.x_target > 0) {
+                k = (Fg - Fa_max) / p.x_target;
+            }
+
+            // 3. Динаміка
+            const L0_px = 100; // Довжина ненавантаженої пружини (візуальна)
+
+            // Позиція верху циліндра
+            const currentSpringLenPx = L0_px + simState.y;
+            const cylTopY = CONSTANTS.springTopY + currentSpringLenPx;
+            const cylH_px = p.h * CONSTANTS.scalePx;
+            const cylBottomY = cylTopY + cylH_px;
+
+            // Розрахунок занурення
+            // waterLevelY - координата Y поверхні води. Все, що більше (нижче) - у воді.
+            let submergedHeightPx = 0;
+            if (cylBottomY > CONSTANTS.waterLevelY) {
+                submergedHeightPx = Math.min(cylH_px, cylBottomY - CONSTANTS.waterLevelY);
+            }
+            // Якщо тіло вище води - submergedHeightPx = 0
+            if (cylTopY < CONSTANTS.waterLevelY && cylBottomY < CONSTANTS.waterLevelY) {
+                 submergedHeightPx = 0; // повністю в повітрі (хоча логіка вище це покриває)
+            }
+
+            const submergedRatio = submergedHeightPx / cylH_px;
+            const currentFa = Fa_max * submergedRatio;
+
+            // Сила пружності: F = k * deltaX. deltaX в метрах = simState.y / scalePx
+            const currentX_m = simState.y / CONSTANTS.scalePx;
+            const Fspring = k * currentX_m;
+
+            // Рівняння руху
+            // F_net = Fg - Fspring - Fa - damping
+            const damping = 4.0;
+            const F_net = Fg - Fspring - currentFa - (damping * simState.vy);
+
+            if (!simState.isDragging) {
+                const dt = 0.016;
+                const accel = F_net / m;
+                simState.vy += accel * dt;
+                simState.y += (simState.vy * dt) * CONSTANTS.scalePx;
+            }
+
+            return { p, Fg, currentFa, Fspring, cylTopY, cylH_px, L0_px };
+        }
+
+        // --- Малювання ---
+        function drawArrow(x, y, lenPx, color, label) {
+            // Фільтр дуже малих сил
+            if (Math.abs(lenPx) < 5) return;
+
+            const endY = y + lenPx;
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, endY);
+            // ЗРОБИЛИ ЛІНІЇ ТОВСТІШИМИ
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Малюємо стрілку (голову) більшою
+            const headSize = 12;
+            ctx.beginPath();
+            ctx.moveTo(x, endY);
+            ctx.lineTo(x - headSize/1.5, endY - (lenPx > 0 ? headSize : -headSize));
+            ctx.lineTo(x + headSize/1.5, endY - (lenPx > 0 ? headSize : -headSize));
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            // Текст
+            ctx.font = "bold 16px Arial";
+            ctx.fillStyle = color;
+            ctx.fillText(label, x + 15, endY + (lenPx > 0 ? 5 : 5));
+        }
+
+        function draw() {
+            const data = updatePhysics();
+            simState.time += 0.02;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cx = canvas.width / 2;
+
+            // 1. Склянка (задня стінка)
+            const beakerW = 300;
+            const beakerBottom = 550;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillRect(cx - beakerW/2, CONSTANTS.waterLevelY - 20, beakerW, beakerBottom - CONSTANTS.waterLevelY + 20);
+
+            // 2. Вода (задній шар)
+            ctx.fillStyle = 'rgba(59, 130, 246, 0.2)'; // Прозора блакитна
+            ctx.fillRect(cx - beakerW/2 + 5, CONSTANTS.waterLevelY, beakerW - 10, beakerBottom - CONSTANTS.waterLevelY - 5);
+
+            // Верхня лінія води (хвилька)
+            ctx.beginPath();
+            ctx.moveTo(cx - beakerW/2, CONSTANTS.waterLevelY);
+            for(let i = cx - beakerW/2; i < cx + beakerW/2; i+=5) {
+                ctx.lineTo(i, CONSTANTS.waterLevelY + Math.sin(i/20 + simState.time) * 2);
+            }
+            ctx.strokeStyle = '#60a5fa';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 3. Пружина
+            ctx.beginPath();
+            ctx.moveTo(cx, CONSTANTS.springTopY);
+            const coils = 12;
+            const coilW = 15;
+            const springLen = data.cylTopY - CONSTANTS.springTopY;
+
+            for(let i=0; i<=coils; i++) {
+                const y = CONSTANTS.springTopY + (i/coils)*springLen;
+                const xOffset = (i%2===0) ? -coilW : coilW;
+                if(i===0 || i===coils) ctx.lineTo(cx, y);
+                else ctx.lineTo(cx + xOffset, y);
+            }
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // 4. Циліндр
+            const cylW = data.p.R * 2 * CONSTANTS.scalePx;
+            const cylH = data.cylH_px;
+            const cylX = cx - cylW/2;
+
+            // Градієнт металу
+            const grad = ctx.createLinearGradient(cylX, 0, cylX + cylW, 0);
+            grad.addColorStop(0, '#94a3b8');
+            grad.addColorStop(0.5, '#cbd5e1');
+            grad.addColorStop(1, '#64748b');
+
+            ctx.fillStyle = grad;
+            ctx.fillRect(cylX, data.cylTopY, cylW, cylH);
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(cylX, data.cylTopY, cylW, cylH);
+
+            // 5. Вода (передній шар - overlay) - щоб тіло виглядало "всередині"
+            // Малюємо ту частину води, що перекриває циліндр
+            if (data.cylTopY < beakerBottom && data.cylTopY + cylH > CONSTANTS.waterLevelY) {
+                const overlapTop = Math.max(data.cylTopY, CONSTANTS.waterLevelY);
+                const overlapBottom = Math.min(data.cylTopY + cylH, beakerBottom);
+                const overlapH = Math.max(0, overlapBottom - overlapTop);
+
+                if (overlapH > 0) {
+                    ctx.fillStyle = 'rgba(59, 130, 246, 0.3)'; // Більш насичений синій поверх циліндра
+                    ctx.fillRect(cylX, overlapTop, cylW, overlapH);
+                }
+            }
+
+            // Контур склянки
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(cx - beakerW/2, CONSTANTS.waterLevelY - 30);
+            ctx.lineTo(cx - beakerW/2, beakerBottom);
+            ctx.lineTo(cx + beakerW/2, beakerBottom);
+            ctx.lineTo(cx + beakerW/2, CONSTANTS.waterLevelY - 30);
+            ctx.stroke();
+
+            // 6. ВЕКТОРИ СИЛ (Покращені)
+            const cmY = data.cylTopY + cylH/2;
+
+            // Коефіцієнт масштабування для стрілок (щоб вони були ДОВГИМИ)
+            // Експериментально підібраний множник 50
+            const vecScale = 50;
+
+            // mg (вниз)
+            drawArrow(cx, cmY, data.Fg * vecScale, '#ef4444', 'mg');
+
+            // Fa (вгору) - зсунуто трохи вліво
+            drawArrow(cx - cylW/2 - 15, cmY, -data.currentFa * vecScale, '#3b82f6', 'Fa');
+
+            // Fпр (вгору) - від точки кріплення (верх циліндра)
+            if (data.Fspring > 0) {
+                drawArrow(cx, data.cylTopY, -data.Fspring * vecScale, '#10b981', 'Fпр');
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        // --- Взаємодія (Drag & Drop) ---
+        canvas.addEventListener('mousedown', e => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const data = updatePhysics(); // Отримати поточні координати
+            const cx = canvas.width/2;
+            const w = data.p.R * 2 * CONSTANTS.scalePx;
+
+            if (mouseX >= cx - w/2 && mouseX <= cx + w/2 &&
+                mouseY >= data.cylTopY && mouseY <= data.cylTopY + data.cylH_px) {
+                simState.isDragging = true;
+                simState.dragOffsetY = mouseY - data.cylTopY;
+            }
+        });
+
+        window.addEventListener('mousemove', e => {
+            if (!simState.isDragging) return;
+            const rect = canvas.getBoundingClientRect();
+            const mouseY = e.clientY - rect.top;
+
+            // Зворотній розрахунок simState.y
+            const L0 = 100; // та сама константа, що в updatePhysics
+            const newTopY = mouseY - simState.dragOffsetY;
+            simState.y = newTopY - CONSTANTS.springTopY - L0;
+            simState.vy = 0;
+        });
+
+        window.addEventListener('mouseup', () => simState.isDragging = false);
+
+        // --- Перевірка відповіді ---
+        function checkAnswer() {
+            const userK = parseFloat(document.getElementById('inp_user_k').value);
+            const p = getParams();
+            const V = Math.PI * p.R * p.R * p.h;
+
+            // Точний розрахунок
+            const Fg = p.rho * V * CONSTANTS.g;
+            const Fa = CONSTANTS.rho_water * V * CONSTANTS.g;
+            const trueK = (Fg - Fa) / p.x_target;
+
+            const msg = document.getElementById('feedback-msg');
+            msg.style.display = 'block';
+
+            if (Math.abs(userK - trueK) < (trueK * 0.05)) {
+                msg.className = "feedback success";
+                msg.innerHTML = `✅ <strong>Правильно!</strong><br>Жорсткість k ≈ ${trueK.toFixed(1)} Н/м.`;
+            } else {
+                msg.className = "feedback error";
+                msg.innerHTML = `❌ <strong>Помилка.</strong><br>Правильна відповідь: ${trueK.toFixed(1)} Н/м.<br>Формула: k = (mg - Fa) / x`;
+            }
+        }
+
+        // Ініціалізація початкового положення
+        // Щоб при старті тіло не "падало" з повітря, а вже було в рівновазі
+        function initEquilibrium() {
+            // Емуляція одного кроку фізики для знаходження k
+            const data = updatePhysics();
+            // Встановлюємо y так, щоб пружина була розтягнута на x_target (у пікселях)
+            // x_target в метрах -> в пікселі
+            const targetStretchPx = getParams().x_target * CONSTANTS.scalePx;
+            simState.y = targetStretchPx;
+        }
+        initEquilibrium();
+
+        draw();
+    </script>
+</body>
+</html>
