@@ -48,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const navLinks = document.querySelectorAll(".nav-list a");
   const profileContent = document.getElementById("profile-content");
   const accountContent = document.getElementById("account-content");
+  const teacherContent = document.getElementById("teacher-content");
 
   function showSection(targetSection) {
     if (profileContent)
@@ -56,6 +57,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (accountContent)
       accountContent.style.display =
         targetSection === "account" ? "block" : "none";
+    if (teacherContent)
+      teacherContent.style.display =
+        targetSection === "teacher" ? "block" : "none";
   }
 
   navLinks.forEach((link) => {

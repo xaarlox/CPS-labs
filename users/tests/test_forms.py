@@ -109,3 +109,4 @@ class ProfileFormTest(TestCase):
         form = ProfileForm(data=form_data, files={'profile_image': uploaded_image}, instance=self.profile)
         self.assertTrue(form.is_valid())
 
+

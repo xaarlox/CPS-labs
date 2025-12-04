@@ -49,15 +49,17 @@ class CustomUserCreationForm(UserCreationForm):
 class ProfileForm(ModelForm):
     class Meta:
         model = Profile
-        fields = ['name', 'username', 'academic_group', 'email', 'bio', 'profile_image', 'social_github']
+        # Порядок полів визначає порядок відображення у формі
+        # Тут GitHub буде перед полем "Про себе"
+        fields = ['name', 'username', 'academic_group', 'email', 'social_github', 'bio', 'profile_image']
         labels = {
             'name': 'Прізвище та ім\'я',
             'username': 'Логін',
             'academic_group': 'Група',
             'email': 'Електронна пошта',
-            'bio': 'Про себе',
             'profile_image': 'Фото профілю',
             'social_github': 'GitHub',
+            'bio': 'Про себе',
         }
 
     

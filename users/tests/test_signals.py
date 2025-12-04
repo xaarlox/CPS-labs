@@ -52,3 +52,4 @@ class SignalsTest(TestCase):
         # Перевірка що користувач також був видалений
         self.assertFalse(User.objects.filter(id=user_id).exists())
 
+

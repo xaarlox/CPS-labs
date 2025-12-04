@@ -23,6 +23,7 @@ class Profile(models.Model):
     profile_image = models.ImageField(null=True, blank=True, upload_to='profiles/', default="profiles/user-default.png")
     social_github = models.CharField(max_length=200, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_admin = models.BooleanField(default=False)
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
 
 

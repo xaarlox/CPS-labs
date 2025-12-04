@@ -239,3 +239,4 @@ class EditAccountViewTest(TestCase):
         self.client.post(self.edit_url, form_data)
         mock_messages.success.assert_called_once()
 
+

@@ -13,7 +13,8 @@ def createProfile(sender, instance, created, **kwargs):
             user=user,
             username=user.username,
             email=user.email,
-            name=full_name
+            name=full_name,
+            is_admin=False
             )
 
 

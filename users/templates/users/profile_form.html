@@ -1,175 +1,245 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="uk">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link
-      href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap"
-      rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap"
+            rel="stylesheet"
     />
-    <link rel="stylesheet" href="{% static 'styles/user.css' %}" />
-  </head>
-  <body>
+    <link rel="stylesheet" href="{% static 'styles/user.css' %}"/>
+</head>
+<body>
     <!-- Повідомлення -->
     {% if messages %}
-    <div class="messages-container">
-      {% for message in messages %}
-      <div class="alert alert--{{ message.tags }}">
-        <p class="alert__message">{{ message }}</p>
-        <button class="alert__close">x</button>
-      </div>
-      {% endfor %}
-    </div>
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert alert--{{ message.tags }}">
+                    <p class="alert__message">{{ message }}</p>
+                    <button class="alert__close">x</button>
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 
     <nav class="navbar">
-      <a href="{% url 'home' %}" class="logo">
-        <span class="logo-notes">КФС</span>
-        <span class="logo-app">КУРС</span>
-      </a>
-      <div class="user-menu-wrapper">
-        <div class="user-avatar-circle">
-          {% if user.profile.profile_image %}
-          <img
-            src="{{ user.profile.profile_image.url }}"
-            alt="Аватар"
-            class="avatar-img"
-          />
-          {% else %}
-          <img
-            src="{% static 'profiles/user-default.png' %}"
-            alt="Аватар за замовчуванням"
-            class="avatar-img"
-          />
-          {% endif %}
+        <a href="{% url 'home' %}" class="logo">
+            <span class="logo-notes">КФС</span>
+            <span class="logo-app">КУРС</span>
+        </a>
+        <div class="user-menu-wrapper">
+            <div class="user-avatar-circle">
+                {% if user.profile.profile_image %}
+                    <img
+                            src="{{ user.profile.profile_image.url }}"
+                            alt="Аватар"
+                            class="avatar-img"
+                    />
+                {% else %}
+                    <img
+                            src="{% static 'profiles/user-default.png' %}"
+                            alt="Аватар за замовчуванням"
+                            class="avatar-img"
+                    />
+                {% endif %}
+            </div>
+            <div class="user-dropdown">
+                <a href="{% url 'edit-account' %}"><span>Мій профіль</span></a>
+                <a href="{% url 'labs' %}"><span>Лабораторні</span></a>
+                <a href="{% url 'logout' %}" class="logout"><span>Вийти</span></a>
+            </div>
         </div>
-        <div class="user-dropdown">
-          <a href="{% url 'edit-account' %}"><span>Мій профіль</span></a>
-          <a href="{% url 'labs' %}"><span>Лабораторні</span></a>
-          <a href="{% url 'logout' %}" class="logout"><span>Вийти</span></a>
-        </div>
-      </div>
     </nav>
 
     <div class="content-wrapper">
-      <aside class="sidebar">
-        <div class="sidebar-header">Мій Профіль</div>
-        <nav class="nav-list">
-          <a href="#" class="active" data-section="profile"
-            >Редагувати профіль</a
-          >
-          <a href="#" data-section="account">Налаштування акаунту</a>
-        </nav>
-      </aside>
+        <aside class="sidebar">
+            <div class="sidebar-header">Мій Профіль</div>
+            <nav class="nav-list">
+                <a href="#" class="active" data-section="profile">Редагувати профіль</a>
+                <a href="#" data-section="account">Налаштування акаунту</a>
+                {% if user.profile.is_admin %}
+                  <a href="#" data-section="teacher">Перегляд учасників</a>
+                {% endif %}
+            </nav>
+        </aside>
 
-      <main class="main-settings">
-        <!-- Профіль -->
-        <div id="profile-content" class="content-area">
-          <h2 class="settings-header">Редагування профілю</h2>
+        <main class="main-settings">
+            <!-- Профіль -->
+            <div id="profile-content" class="content-area">
+                <h2 class="settings-header">Редагування профілю</h2>
 
-          <!-- Фото профілю -->
-          <section class="form-section">
-            <h3 class="section-title">Фото профілю</h3>
-            <div class="avatar-area">
-              <form
-                id="avatar-form"
-                method="POST"
-                enctype="multipart/form-data"
-              >
-                {% csrf_token %}
-                <input type="hidden" name="update_avatar" value="1" />
-                <input
-                  type="file"
-                  id="avatar-upload-input"
-                  name="profile_image"
-                  accept="image/*"
-                  style="display: none"
-                />
-                <div
-                  class="user-avatar-display"
-                  title="Натисніть для зміни фото"
-                  onclick="document.getElementById('avatar-upload-input').click()"
-                >
-                  <div class="user-avatar-circle">
-                    {% if user.profile.profile_image %}
-                    <img
-                      src="{{ user.profile.profile_image.url }}"
-                      alt="Аватар"
-                      class="avatar-img"
-                    />
-                    {% else %}
-                    <img
-                      src="{% static 'profiles/user-default.png' %}"
-                      alt="Аватар за замовчуванням"
-                      class="avatar-img"
-                    />
-                    {% endif %}
-                  </div>
-                </div>
-              </form>
+                <!-- Фото профілю -->
+                <section class="form-section">
+                    <h3 class="section-title">Фото профілю</h3>
+                    <div class="avatar-area">
+                        <form
+                                id="avatar-form"
+                                method="POST"
+                                enctype="multipart/form-data"
+                        >
+                            {% csrf_token %}
+                            <input type="hidden" name="update_avatar" value="1"/>
+                            <input
+                                    type="file"
+                                    id="avatar-upload-input"
+                                    name="profile_image"
+                                    accept="image/*"
+                                    style="display: none"
+                            />
+                            <div
+                                    class="user-avatar-display"
+                                    title="Натисніть для зміни фото"
+                                    onclick="document.getElementById('avatar-upload-input').click()"
+                            >
+                                <div class="user-avatar-circle">
+                                    {% if user.profile.profile_image %}
+                                        <img
+                                                src="{{ user.profile.profile_image.url }}"
+                                                alt="Аватар"
+                                                class="avatar-img"
+                                        />
+                                    {% else %}
+                                        <img
+                                                src="{% static 'profiles/user-default.png' %}"
+                                                alt="Аватар за замовчуванням"
+                                                class="avatar-img"
+                                        />
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="user-status" style="text-align: center; margin-top: 8px;">
+                                {% if user.profile.is_admin %}
+                                    <span class="teacher" style="color: #1976d2; font-weight: bold;">Викладач</span>
+                                {% else %}
+                                    <span class="student" style="color: #388e3c; font-weight: bold;">Студент</span>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Основні дані -->
+                <section class="form-section">
+                    <h3 class="section-title">Основні дані</h3>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="update_profile" value="1"/>
+                        <div class="form-grid">
+                            {% for field in form %}
+                                {% if field.name != 'profile_image' %}
+                                    {% if field.name == 'academic_group' and user.profile.is_admin %}
+                                    {% else %}
+                                        <div class="form-group">
+                                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                            {{ field }}
+                                            {% if field.errors %}
+                                                <span class="error">{{ field.errors }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="btn-save">Зберегти зміни</button>
+                    </form>
+                </section>
             </div>
-          </section>
 
-          <!-- Основні дані -->
-          <section class="form-section">
-            <h3 class="section-title">Основні дані</h3>
-            <form method="POST">
-              {% csrf_token %}
-              <input type="hidden" name="update_profile" value="1" />
-              <div class="form-grid">
-                {% for field in form %} {% if field.name != 'profile_image' %}
-                <div class="form-group">
-                  <label for="{{ field.id_for_label }}"
-                    >{{ field.label }}</label
-                  >
-                  {{ field }} {% if field.errors %}
-                  <span class="error">{{ field.errors }}</span>
-                  {% endif %}
-                </div>
-                {% endif %} {% endfor %}
-              </div>
-              <button type="submit" class="btn-save">Зберегти зміни</button>
-            </form>
-          </section>
-        </div>
+            <!-- Налаштування акаунту -->
+            <div id="account-content" class="content-area" style="display: none">
+                <h2 class="settings-header">Налаштування акаунту</h2>
 
-        <!-- Налаштування акаунту -->
-        <div id="account-content" class="content-area" style="display: none">
-          <h2 class="settings-header">Налаштування акаунту</h2>
+                <section class="form-section">
+                    <h3 class="section-title">Зміна пароля</h3>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="change_password" value="1"/>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="{{ password_form.old_password.id_for_label }}"
+                                >Поточний пароль</label
+                                >
+                                {{ password_form.old_password }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ password_form.new_password1.id_for_label }}"
+                                >Новий пароль</label
+                                >
+                                {{ password_form.new_password1 }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ password_form.new_password2.id_for_label }}"
+                                >Підтвердження пароля</label
+                                >
+                                {{ password_form.new_password2 }}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-save">Змінити пароль</button>
+                    </form>
+                </section>
+            </div>
 
-          <section class="form-section">
-            <h3 class="section-title">Зміна пароля</h3>
-            <form method="POST">
-              {% csrf_token %}
-              <input type="hidden" name="change_password" value="1" />
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="{{ password_form.old_password.id_for_label }}"
-                    >Поточний пароль</label
-                  >
-                  {{ password_form.old_password }}
-                </div>
-                <div class="form-group">
-                  <label for="{{ password_form.new_password1.id_for_label }}"
-                    >Новий пароль</label
-                  >
-                  {{ password_form.new_password1 }}
-                </div>
-                <div class="form-group">
-                  <label for="{{ password_form.new_password2.id_for_label }}"
-                    >Підтвердження пароля</label
-                  >
-                  {{ password_form.new_password2 }}
-                </div>
-              </div>
-              <button type="submit" class="btn-save">Змінити пароль</button>
-            </form>
-          </section>
-        </div>
-      </main>
+            {% if user.profile.is_admin %}
+            <div id="teacher-content" class="content-area" style="display: none">
+                <h2>Список студентів</h2>
+                <table class="user-list-table">
+                    <thead>
+                        <tr>
+                            <th>Фото</th>
+                            <th>ПІБ</th>
+                            <th>Група</th>
+                            <th>Email</th>
+                            <th>GitHub</th>
+                            <th>Тип</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_item in users %}
+                            <tr>
+                                <td>
+                                    {% if user_item.profile_image %}
+                                        <img src="{{ user_item.profile_image.url }}" alt="avatar" width="40" height="40" style="border-radius: 50%;" />
+                                    {% else %}
+                                        <img src="{% static 'profiles/user-default.png' %}" alt="avatar" width="40" height="40" style="border-radius: 50%;" />
+                                    {% endif %}
+                                </td>
+                                <td>{{ user_item.name|default:user_item.username }}</td>
+                                <td>
+                                    {% if user_item.academic_group %}
+                                        {{ user_item.academic_group.name }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>{{ user_item.email }}</td>
+                                <td>
+                                    {% if user_item.social_github %}
+                                        <a href="{{ user_item.social_github }}" target="_blank">{{ user_item.social_github }}</a>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user_item.is_admin %}
+                                        <span style="color:#1976d2;font-weight:bold;">Викладач</span>
+                                    {% else %}
+                                        <span style="color:#388e3c;font-weight:bold;">Студент</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6">Користувачів не знайдено.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </main>
     </div>
 
-    <script src="{% static 'js/script.js' %}"></script>
-  </body>
+<script src="{% static 'js/script.js' %}"></script>
+</body>
 </html>

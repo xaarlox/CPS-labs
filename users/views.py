@@ -5,6 +5,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .forms import CustomUserCreationForm, ProfileForm
+from .models import Profile
 
 
 def loginUser(request):
@@ -66,6 +67,9 @@ def registerUser(request):
 def editAccount(request):
     profile = request.user.profile
     user = request.user
+    students = None
+    if profile.is_admin:
+        students = Profile.objects.filter(is_admin=False).order_by('name')
 
     if request.method == 'POST':
         if 'change_password' in request.POST:
@@ -106,5 +110,10 @@ def editAccount(request):
         form = ProfileForm(instance=profile)
         password_form = PasswordChangeForm(user)
 
-    context = {'form': form, 'profile': profile, 'password_form': password_form}
+    context = {
+        'form': form,
+        'profile': profile,
+        'password_form': password_form,
+        'users': students,
+    }
     return render(request, 'users/profile_form.html', context)
