@@ -49,8 +49,6 @@ class CustomUserCreationForm(UserCreationForm):
 class ProfileForm(ModelForm):
     class Meta:
         model = Profile
-        # Порядок полів визначає порядок відображення у формі
-        # Тут GitHub буде перед полем "Про себе"
         fields = ['name', 'username', 'academic_group', 'email', 'social_github', 'bio', 'profile_image']
         labels = {
             'name': 'Прізвище та ім\'я',
@@ -63,6 +61,23 @@ class ProfileForm(ModelForm):
         }
 
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'input', 'placeholder': ' '})
+
+
+class AdminProfileUpdateForm(ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['name', 'academic_group', 'email', 'is_admin']
+        labels = {
+            'name': 'Прізвище та ім\'я',
+            'academic_group': 'Група',
+            'email': 'Електронна пошта',
+            'is_admin': 'Чи користувач є викладачем?',
+        }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():

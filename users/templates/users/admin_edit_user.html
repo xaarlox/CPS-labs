@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+            href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap"
+            rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'styles/user.css' %}" />
+    <title>Редагування користувача</title>
+</head>
+<body>
+<nav class="navbar">
+    <a href="{% url 'home' %}" class="logo">
+        <span class="logo-notes">КФС</span>
+        <span class="logo-app">КУРС</span>
+    </a>
+    <div class="user-menu-wrapper">
+        <div class="user-dropdown">
+            <a href="{% url 'edit-account' %}"><span>Мій профіль</span></a>
+            <a href="{% url 'logout' %}" class="logout"><span>Вийти</span></a>
+        </div>
+    </div>
+</nav>
+
+<div class="content-wrapper">
+    <main class="main-settings">
+        <h2 class="settings-header">
+            Редагування користувача:
+            {{ edited_profile.name|default:edited_profile.username }}
+        </h2>
+
+        <section class="form-section">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-grid">
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <span class="error">{{ field.errors }}</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn-save">Зберегти зміни</button>
+                <a href="{% url 'edit-account' %}" class="btn-small" style="margin-left: 12px;">Скасувати</a>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>
+
+

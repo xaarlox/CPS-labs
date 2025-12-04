@@ -1,11 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.contrib.auth.models import User
-from .forms import CustomUserCreationForm, ProfileForm
-from .models import Profile
+from .forms import CustomUserCreationForm, ProfileForm, AdminProfileUpdateForm
+from .models import Profile, AcademicGroup
 
 
 def loginUser(request):
@@ -67,9 +67,31 @@ def registerUser(request):
 def editAccount(request):
     profile = request.user.profile
     user = request.user
-    students = None
+
+    # Дані для вкладки "Перегляд учасників" (тільки для адміна)
+    grouped_students = []
+    admins = []
+    unknown_users = []
     if profile.is_admin:
-        students = Profile.objects.filter(is_admin=False).order_by('name')
+        groups = AcademicGroup.objects.all().order_by('name')
+        for group in groups:
+            students_in_group = Profile.objects.filter(
+                is_admin=False,
+                academic_group=group,
+            ).order_by('name')
+            if students_in_group.exists():
+                grouped_students.append((group, students_in_group))
+
+        # Викладачі (адміністратори), крім поточного користувача
+        admins = Profile.objects.filter(
+            is_admin=True,
+        ).exclude(pk=profile.pk).order_by('name')
+
+        # "Невідомі" користувачі: без групи і не адміністратори
+        unknown_users = Profile.objects.filter(
+            is_admin=False,
+            academic_group__isnull=True,
+        ).order_by('name')
 
     if request.method == 'POST':
         if 'change_password' in request.POST:
@@ -114,6 +136,45 @@ def editAccount(request):
         'form': form,
         'profile': profile,
         'password_form': password_form,
-        'users': students,
+        'grouped_students': grouped_students,
+        'admins': admins,
+        'unknown_users': unknown_users,
     }
     return render(request, 'users/profile_form.html', context)
+
+
+@login_required(login_url='login')
+def admin_edit_user(request, pk):
+    if not request.user.profile.is_admin:
+        return redirect('edit-account')
+
+    profile_obj = get_object_or_404(Profile, pk=pk)
+
+    if request.method == 'POST':
+        form = AdminProfileUpdateForm(request.POST, instance=profile_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Дані користувача успішно оновлено.')
+            return redirect('edit-account')
+    else:
+        form = AdminProfileUpdateForm(instance=profile_obj)
+
+    context = {'form': form, 'edited_profile': profile_obj}
+    return render(request, 'users/admin_edit_user.html', context)
+
+
+@login_required(login_url='login')
+def admin_delete_user(request, pk):
+    if not request.user.profile.is_admin:
+        return redirect('edit-account')
+
+    profile_obj = get_object_or_404(Profile, pk=pk)
+
+    if request.method == 'POST':
+        full_name = profile_obj.name or profile_obj.username
+        profile_obj.delete()
+        messages.success(request, f'Користувача "{full_name}" видалено.')
+        return redirect('edit-account')
+
+    context = {'profile_to_delete': profile_obj}
+    return render(request, 'users/admin_confirm_delete.html', context)

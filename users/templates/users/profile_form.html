@@ -110,9 +110,9 @@
                             </div>
                             <div class="user-status" style="text-align: center; margin-top: 8px;">
                                 {% if user.profile.is_admin %}
-                                    <span class="teacher" style="color: #1976d2; font-weight: bold;">Викладач</span>
+                                    <span class="teacher" style="color: #b11c1c; font-weight: bold;">Викладач</span>
                                 {% else %}
-                                    <span class="student" style="color: #388e3c; font-weight: bold;">Студент</span>
+                                    <span class="student" style="color: #6ca082; font-weight: bold;">Студент</span>
                                 {% endif %}
                             </div>
                         </form>
@@ -182,59 +182,121 @@
 
             {% if user.profile.is_admin %}
             <div id="teacher-content" class="content-area" style="display: none">
-                <h2>Список студентів</h2>
-                <table class="user-list-table">
-                    <thead>
-                        <tr>
-                            <th>Фото</th>
-                            <th>ПІБ</th>
-                            <th>Група</th>
-                            <th>Email</th>
-                            <th>GitHub</th>
-                            <th>Тип</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user_item in users %}
-                            <tr>
-                                <td>
-                                    {% if user_item.profile_image %}
-                                        <img src="{{ user_item.profile_image.url }}" alt="avatar" width="40" height="40" style="border-radius: 50%;" />
-                                    {% else %}
-                                        <img src="{% static 'profiles/user-default.png' %}" alt="avatar" width="40" height="40" style="border-radius: 50%;" />
-                                    {% endif %}
-                                </td>
-                                <td>{{ user_item.name|default:user_item.username }}</td>
-                                <td>
-                                    {% if user_item.academic_group %}
-                                        {{ user_item.academic_group.name }}
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </td>
-                                <td>{{ user_item.email }}</td>
-                                <td>
-                                    {% if user_item.social_github %}
-                                        <a href="{{ user_item.social_github }}" target="_blank">{{ user_item.social_github }}</a>
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if user_item.is_admin %}
-                                        <span style="color:#1976d2;font-weight:bold;">Викладач</span>
-                                    {% else %}
-                                        <span style="color:#388e3c;font-weight:bold;">Студент</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="6">Користувачів не знайдено.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <h2 class="settings-header">Список студентів</h2>
+
+                {% if grouped_students %}
+                    {% for group, students in grouped_students %}
+                        <section class="form-section">
+                            <h3 class="section-title">Група {{ group.name }}</h3>
+                            <table class="user-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>ПІБ</th>
+                                        <th>Email</th>
+                                        <th>Дії</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in students %}
+                                        <tr>
+                                            <td>{{ student.name|default:student.username }}</td>
+                                            <td>{{ student.email }}</td>
+                                            <td>
+                                                <a href="{% url 'admin-edit-user' student.id %}" class="btn-small">Редагувати</a>
+                                                <form method="post"
+                                                      action="{% url 'admin-delete-user' student.id %}"
+                                                      style="display:inline-block;">
+                                                    {% csrf_token %}
+                                                    <button type="submit"
+                                                            class="btn-small btn-danger"
+                                                            onclick="return confirm('Видалити цього користувача?');">
+                                                        Видалити
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </section>
+                    {% endfor %}
+                {% endif %}
+
+                {% if admins %}
+                    <section class="form-section">
+                        <h3 class="section-title">Викладачі</h3>
+                        <table class="user-list-table">
+                            <thead>
+                                <tr>
+                                    <th>ПІБ</th>
+                                    <th>Email</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for teacher in admins %}
+                                    <tr>
+                                        <td>{{ teacher.name|default:teacher.username }}</td>
+                                        <td>{{ teacher.email }}</td>
+                                        <td>
+                                            <a href="{% url 'admin-edit-user' teacher.id %}" class="btn-small">Редагувати</a>
+                                            <form method="post"
+                                                  action="{% url 'admin-delete-user' teacher.id %}"
+                                                  style="display:inline-block;">
+                                                {% csrf_token %}
+                                                <button type="submit"
+                                                        class="btn-small btn-danger"
+                                                        onclick="return confirm('Видалити цього користувача?');">
+                                                    Видалити
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </section>
+                {% endif %}
+
+                {% if unknown_users %}
+                    <section class="form-section">
+                        <h3 class="section-title">Невідомі користувачі</h3>
+                        <table class="user-list-table">
+                            <thead>
+                                <tr>
+                                    <th>ПІБ</th>
+                                    <th>Email</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in unknown_users %}
+                                    <tr>
+                                        <td>{{ student.name|default:student.username }}</td>
+                                        <td>{{ student.email }}</td>
+                                        <td>
+                                            <a href="{% url 'admin-edit-user' student.id %}" class="btn-small">Редагувати</a>
+                                            <form method="post"
+                                                  action="{% url 'admin-delete-user' student.id %}"
+                                                  style="display:inline-block;">
+                                                {% csrf_token %}
+                                                <button type="submit"
+                                                        class="btn-small btn-danger"
+                                                        onclick="return confirm('Видалити цього користувача?');">
+                                                    Видалити
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </section>
+                {% endif %}
+
+                {% if not grouped_students and not admins and not unknown_users %}
+                    <p>Користувачів поки що немає.</p>
+                {% endif %}
             </div>
             {% endif %}
         </main>

@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+            href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap"
+            rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'styles/user.css' %}" />
+    <title>Підтвердження видалення</title>
+</head>
+<body>
+<nav class="navbar">
+    <a href="{% url 'home' %}" class="logo">
+        <span class="logo-notes">КФС</span>
+        <span class="logo-app">КУРС</span>
+    </a>
+    <div class="user-menu-wrapper">
+        <div class="user-dropdown">
+            <a href="{% url 'edit-account' %}"><span>Мій профіль</span></a>
+            <a href="{% url 'logout' %}" class="logout"><span>Вийти</span></a>
+        </div>
+    </div>
+</nav>
+
+<div class="content-wrapper">
+    <main class="main-settings">
+        <h2 class="settings-header">Підтвердження видалення</h2>
+
+        <section class="form-section">
+            <p>
+                Ви дійсно бажаєте видалити користувача
+                <strong>{{ profile_to_delete.name|default:profile_to_delete.username }}</strong>?
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn-small btn-danger">Так, видалити</button>
+                <a href="{% url 'edit-account' %}" class="btn-small" style="margin-left: 12px;">Скасувати</a>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>
+
+
