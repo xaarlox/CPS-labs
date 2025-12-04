@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторна: Термодинаміка</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Basic Theme Colors */
+            --color-dark: #2f2f2f;
+            --color-light: #f2ede7;
+            --gradient-start: #4f735c;
+            --gradient-end: #6ca082;
+            --color-card-bg: #3a3a3a;
+            --color-accent: #6ca082;
+            --color-action-btn-main: #385642;
+            --color-action-btn-hover: #2a4032;
+            
+            /* Sim Specific */
+            --border: rgba(255, 255, 255, 0.15);
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Sim needs fixed screen */
+            font-family: 'Ubuntu', sans-serif;
+            background-color: var(--color-dark);
+            color: var(--color-light);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* --- MAIN LAYOUT --- */
+        .workspace {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        /* --- CANVAS --- */
+        #simCanvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            background: radial-gradient(circle at 50% 60%, #3a3a3a, #2f2f2f);
+        }
+
+        /* --- UI LAYER --- */
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none; /* Let clicks pass to canvas */
+        }
+
+        /* --- PANELS --- */
+        .panel {
+            pointer-events: auto;
+            background: var(--color-card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* HEADERS & LABELS */
+        .panel-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        
+        .label-row { 
+            display: flex; justify-content: space-between; 
+            font-weight: 500; font-size: 0.9rem; color: #ccc; 
+        }
+        
+        .val-badge {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(108, 160, 130, 0.2);
+            color: var(--color-light);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* SLIDERS */
+        input[type="range"] {
+            width: 100%; height: 6px;
+            background: #222;
+            border-radius: 3px;
+            outline: none; -webkit-appearance: none; cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px; height: 18px;
+            background: var(--color-accent);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            margin-top: -6px;
+            transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+
+        /* GAUGES */
+        .gauge-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .gauge {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .gauge-label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; margin-bottom: 4px; }
+        .gauge-val { 
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 1.4rem; font-weight: 700; color: var(--color-light);
+        }
+        .gauge-unit { font-size: 0.75rem; color: var(--color-accent); }
+
+        /* ANSWER BOX */
+        .answer-box {
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+        .subtitle { font-size: 0.9rem; margin-bottom: 12px; color: #ccc; }
+
+        .input-wrapper {
+            display: flex; 
+            align-items: center; 
+            justify-content: center; /* Центрируем содержимое */
+            gap: 10px; 
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+        }
+        
+        input[type="number"] {
+            width: 80px; /* Фиксированная маленькая ширина */
+            background: transparent; 
+            border: none;
+            border-bottom: 1px solid var(--color-accent); /* Подчеркивание для акцента */
+            color: var(--color-light); 
+            text-align: center;
+            font-family: 'JetBrains Mono'; 
+            font-size: 1.2rem; 
+            font-weight: 700;
+            outline: none;
+            padding: 0; 
+            margin: 0;
+        }
+        
+        /* HIDE SPINNER BUTTONS */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .btn-action {
+            width: 100%; padding: 12px;
+            background: var(--color-action-btn-main);
+            color: var(--color-light);
+            border: none; border-radius: 6px;
+            font-family: 'Ubuntu', sans-serif; font-weight: 700; font-size: 1rem;
+            cursor: pointer; transition: 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .btn-action:hover { background: var(--color-action-btn-hover); }
+
+        .feedback {
+            margin-top: 15px; padding: 12px; border-radius: 8px;
+            font-size: 0.9rem; font-weight: 500; text-align: center; display: none;
+        }
+        .feedback.success { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #86efac; }
+        .feedback.error { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; }
+
+        /* Modal (exact from ballistics_simulation) */
+        .modal {
+            display: none;
+            position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            align-items: center; justify-content: center;
+        }
+        .modal.show { display: flex; }
+        .modal-box {
+            background: #fff; padding: 30px; border-radius: 8px;
+            text-align: center; border: 4px solid #2c3e50;
+            box-shadow: 10px 10px 0 rgba(0,0,0,0.2);
+            animation: popIn 0.3s ease;
+            min-width: 300px; max-width: 90%;
+            /* Force dark text inside modal to match ballistics style */
+            color: #2c3e50;
+        }
+        @keyframes popIn { from {transform: scale(0.5); opacity:0;} to {transform: scale(1); opacity:1;} }
+        .grade-big { font-size: 4rem; font-weight: 800; color: #27ae60; margin: 10px 0; }
+        .modal-box h2 { font-size: 1.6rem; margin-bottom: 6px; font-weight: 800; color: #2c3e50; }
+        .modal-btn { background: #2c3e50; color: white; border: none; padding: 12px 30px; font-size: 1.1rem; border-radius: 4px; cursor: pointer; margin-top: 20px; }
+
+        /* Tip Box */
+        .tip-box {
+            font-size: 0.85rem; color: #aaa;
+            background: rgba(79, 115, 92, 0.15);
+            border-left: 3px solid var(--color-accent);
+            padding: 12px; border-radius: 6px; line-height: 1.4;
+        }
+
+        @media (max-width: 900px) {
+            .ui-layer { flex-direction: column; overflow-y: auto; pointer-events: auto; }
+            .panel { width: 100%; margin-bottom: 20px; pointer-events: auto;}
+        }
+    </style>
+</head>
+<body data-lab-id="{{ lab.id }}" data-attempts-left="{{ submission.attempts_left }}">
+
+    <div class="workspace">
+        <canvas id="simCanvas"></canvas>
+
+        <div class="ui-layer">
+            <!-- LEFT: CONTROLS -->
+            <div class="panel">
+                <div class="panel-header">Налаштування</div>
+                
+                <div class="control-group">
+                    <div class="label-row"><label>ТЕМПЕРАТУРА (T)</label> <span class="val-badge" id="val-temp">300 K</span></div>
+                    <input type="range" id="rng-temp" min="100" max="600" step="1" value="300">
+                </div>
+
+                <div class="tip-box">
+                    <strong style="color:var(--color-accent)">ПІДКАЗКА:</strong><br>
+                    Тягніть поршень на екрані, щоб змінити об'єм газу.
+                </div>
+                </div>
+
+                <!-- Result modal (same style as ballistics_simulation) -->
+                <div id="res-modal" class="modal">
+                    <div class="modal-box">
+                        <h2>Результат</h2>
+                        <div class="grade-big" id="mod-grade">--</div>
+                        <div id="mod-msg" style="font-size:1.1rem; margin-bottom:8px; font-weight:700;">--</div>
+                        <div id="mod-err" style="display:none;"></div>
+                        <button class="modal-btn" id="modal-close">Закрити</button>
+                    </div>
+                </div>
+
+            <!-- RIGHT: DATA & TASK -->
+            <div class="panel">
+                <div class="panel-header">Датчики</div>
+
+                <div class="gauge-grid">
+                    <div class="gauge">
+                        <div class="gauge-label">Тиск (P)</div>
+                        <div class="gauge-val" id="disp-p">--</div>
+                        <div class="gauge-unit">кПа</div>
+                    </div>
+                    <div class="gauge">
+                        <div class="gauge-label">Об'єм (V)</div>
+                        <div class="gauge-val" id="disp-v">--</div>
+                        <div class="gauge-unit">літрів</div>
+                    </div>
+                    <div class="gauge" style="grid-column: span 2">
+                        <div class="gauge-label">Температура (T)</div>
+                        <div class="gauge-val" id="disp-t">--</div>
+                        <div class="gauge-unit">Кельвін</div>
+                    </div>
+                </div>
+
+                <div class="answer-box">
+                    <div class="subtitle">ОБЧИСЛІТЬ КІЛЬКІСТЬ (n)</div>
+                    <div class="input-wrapper">
+                        <span style="font-family:'JetBrains Mono'; color:#888;">n =</span>
+                        <input type="number" id="inp-ans" placeholder="?.??" autocomplete="off">
+                        <span style="font-family:'JetBrains Mono'; color:#888;">моль</span>
+                    </div>
+                    <button class="btn-action" onclick="checkAnswer()">ПЕРЕВІРИТИ</button>
+                    <div id="feedback" class="feedback"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- CONSTANTS ---
+        const R_GAS = 8.31; 
+        const MOLES_SECRET = (2 + Math.random() * 3); 
+        
+        // --- STATE ---
+        const state = {
+            T: 300,         
+            V_L: 200,       
+            P_kPa: 0,       
+            container: { x: 0, y: 0, w: 300, h: 500, groundY: 0 },
+            pistonY: 0,     
+            particles: [],
+            isDragging: false,
+            dragOffset: 0,
+            time: 0
+        };
+
+        const els = {
+            rngTemp: document.getElementById('rng-temp'),
+            valTemp: document.getElementById('val-temp'),
+            dispP: document.getElementById('disp-p'),
+            dispV: document.getElementById('disp-v'),
+            dispT: document.getElementById('disp-t'),
+            inpAns: document.getElementById('inp-ans'),
+            feedback: document.getElementById('feedback')
+        };
+
+        // --- INIT ---
+        function init() {
+            resize();
+            window.addEventListener('resize', resize);
+            
+            for(let i=0; i<120; i++) {
+                state.particles.push({
+                    x: state.container.x + Math.random() * state.container.w,
+                    y: state.container.groundY - Math.random() * 200, 
+                    vx: (Math.random()-0.5) * 5,
+                    vy: (Math.random()-0.5) * 5,
+                    r: 4 + Math.random()*2
+                });
+            }
+            
+            updatePhysicsLogic();
+            loop();
+        }
+
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            
+            const cw = 300; 
+            const cx = canvas.width / 2;
+            const groundY = canvas.height - 100;
+            
+            state.container = {
+                x: cx - cw/2,
+                w: cw,
+                groundY: groundY,
+                maxH: canvas.height - 200
+            };
+            
+            updatePistonFromVolume();
+        }
+
+        // --- PHYSICS ---
+        function updatePhysicsLogic() {
+            state.P_kPa = (MOLES_SECRET * R_GAS * state.T) / state.V_L;
+            state.speedFactor = Math.sqrt(state.T) * 0.15;
+        }
+
+        function updateVolumeFromPiston() {
+            const hPx = state.container.groundY - state.pistonY;
+            state.V_L = Math.max(50, Math.min(500, hPx)); 
+            state.pistonY = state.container.groundY - state.V_L;
+        }
+
+        function updatePistonFromVolume() {
+            state.pistonY = state.container.groundY - state.V_L;
+        }
+
+        // --- LOOP ---
+        function loop() {
+            state.time += 0.05;
+            state.T = parseInt(els.rngTemp.value);
+            updatePhysicsLogic();
+            
+            els.valTemp.innerText = state.T + " K";
+            els.dispT.innerText = state.T;
+            els.dispP.innerText = state.P_kPa.toFixed(1);
+            els.dispV.innerText = state.V_L.toFixed(0);
+
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+
+            drawHeater();
+
+            // Container Back
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
+            ctx.fillRect(state.container.x, state.container.groundY - 600, state.container.w, 600);
+            
+            drawGrid(state.container.x, state.container.groundY - 600, state.container.w, 600);
+            drawParticles();
+            drawPiston();
+            drawContainerGlass();
+
+            requestAnimationFrame(loop);
+        }
+
+        function drawGrid(x, y, w, h) {
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.lineWidth = 1;
+            for(let i=x; i<=x+w; i+=40) { ctx.moveTo(i, y); ctx.lineTo(i, y+h); }
+            for(let j=y; j<=y+h; j+=40) { ctx.moveTo(x, j); ctx.lineTo(x+w, j); }
+            ctx.stroke();
+        }
+
+        function drawParticles() {
+            const floor = state.container.groundY;
+            const ceil = state.pistonY;
+            const wallL = state.container.x;
+            const wallR = state.container.x + state.container.w;
+
+            state.particles.forEach(p => {
+                p.x += p.vx * state.speedFactor;
+                p.y += p.vy * state.speedFactor;
+
+                if (p.x < wallL + p.r) { p.x = wallL + p.r; p.vx *= -1; }
+                if (p.x > wallR - p.r) { p.x = wallR - p.r; p.vx *= -1; }
+                if (p.y > floor - p.r) { p.y = floor - p.r; p.vy *= -1; }
+                if (p.y < ceil + p.r) { p.y = ceil + p.r; p.vy *= -1; }
+
+                // Temperature Colors (Blue -> Red) suitable for dark theme
+                const tRatio = (state.T - 100) / 500;
+                const r = Math.floor(tRatio * 255);
+                const b = Math.floor((1 - tRatio) * 255);
+                const g = 100; 
+                
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                ctx.fillStyle = `rgb(${r},${g},${b})`;
+                ctx.fill();
+            });
+        }
+
+        function drawPiston() {
+            const h = 40;
+            const y = state.pistonY;
+            const x = state.container.x;
+            const w = state.container.w;
+
+            // Body
+            ctx.fillStyle = '#4a4a4a';
+            ctx.fillRect(x + 2, y - h, w - 4, h);
+            
+            // Accent Line
+            ctx.strokeStyle = '#6ca082'; // Accent Green
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x + 5, y - h + 5, w - 10, h - 10);
+
+            // Handle
+            ctx.beginPath();
+            ctx.moveTo(x + w/2, y - h);
+            ctx.lineTo(x + w/2, y - h - 50);
+            ctx.moveTo(x + w/2 - 30, y - h - 50);
+            ctx.lineTo(x + w/2 + 30, y - h - 50);
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            if (state.isDragging) {
+                ctx.strokeStyle = '#fff';
+                ctx.stroke();
+            }
+        }
+
+        function drawContainerGlass() {
+            const x = state.container.x;
+            const y = state.container.groundY - 600;
+            const w = state.container.w;
+            const h = 600;
+
+            // Walls
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, y+h);
+            ctx.lineTo(x+w, y+h);
+            ctx.lineTo(x+w, y);
+            ctx.stroke();
+
+            // Glass Shine
+            const grad = ctx.createLinearGradient(x, 0, x+w, 0);
+            grad.addColorStop(0, 'rgba(255,255,255,0.1)');
+            grad.addColorStop(0.5, 'rgba(255,255,255,0.0)');
+            grad.addColorStop(1, 'rgba(255,255,255,0.1)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(x, y, w, h);
+        }
+
+        function drawHeater() {
+            const x = state.container.x;
+            const w = state.container.w;
+            const y = state.container.groundY + 5;
+
+            ctx.fillStyle = '#222';
+            ctx.fillRect(x + 20, y, w - 40, 25);
+
+            const tRatio = (state.T - 100) / 500;
+            const alpha = 0.2 + tRatio * 0.8;
+            ctx.fillStyle = `rgba(220, 50, 50, ${alpha})`; // Red Glow
+            
+            ctx.beginPath();
+            for(let i=0; i<w-60; i+=12) {
+                ctx.arc(x + 30 + i, y + 8, 4, 0, Math.PI*2);
+            }
+            ctx.fill();
+        }
+
+        // --- INTERACTION ---
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        }
+
+        canvas.addEventListener('mousedown', e => {
+            const m = getMousePos(e);
+            const pY = state.pistonY;
+            const pX = state.container.x;
+            const pW = state.container.w;
+            
+            if (m.x > pX && m.x < pX + pW && m.y > pY - 60 && m.y < pY + 10) {
+                state.isDragging = true;
+                state.dragOffset = m.y - pY;
+                canvas.style.cursor = 'grabbing';
+            }
+        });
+
+        window.addEventListener('mousemove', e => {
+            const m = getMousePos(e);
+            
+            // Cursor
+            const pY = state.pistonY;
+            const pX = state.container.x;
+            const pW = state.container.w;
+            if (!state.isDragging) {
+                if (m.x > pX && m.x < pX + pW && m.y > pY - 60 && m.y < pY + 10) {
+                    canvas.style.cursor = 'grab';
+                } else {
+                    canvas.style.cursor = 'default';
+                }
+            }
+
+            if (!state.isDragging) return;
+            state.pistonY = m.y - state.dragOffset;
+            const minY = state.container.groundY - 500;
+            const maxY = state.container.groundY - 50;
+            state.pistonY = Math.max(minY, Math.min(maxY, state.pistonY));
+            updateVolumeFromPiston();
+        });
+
+        window.addEventListener('mouseup', () => {
+            state.isDragging = false;
+            canvas.style.cursor = 'default';
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function checkAnswer() {
+            const userN = parseFloat(els.inpAns.value);
+            const modal = document.getElementById('res-modal');
+            const gradeEl = document.getElementById('mod-grade');
+            const msgEl = document.getElementById('mod-msg');
+            const errEl = document.getElementById('mod-err');
+
+            if (!userN && userN !== 0) {
+                gradeEl.innerText = 0;
+                msgEl.innerText = 'Введіть число';
+                errEl.innerText = '';
+                modal.classList.add('show');
+                return;
+            }
+
+            const err = Math.abs((userN - MOLES_SECRET) / MOLES_SECRET);
+
+            let score = 0;
+            let text = 'Невірно';
+            if (err < 0.02) { score = 100; text = 'Ідеально'; }
+            else if (err < 0.05) { score = 95; text = 'Правильно'; }
+            else if (err < 0.12) { score = 80; text = 'Добре'; }
+            else if (err < 0.2) { score = 60; text = 'Погано'; }
+            else { score = 40; text = 'Невірно'; }
+
+            gradeEl.innerText = score;
+            msgEl.innerText = text;
+            // Do not show correct answer — only show score
+            errEl.innerText = '';
+            modal.classList.remove('hidden');
+            modal.classList.add('show');
+
+            // Send score to server
+            const csrfToken = getCookie('csrftoken');
+            const payload = {
+                lab_id: document.body.dataset.labId,
+                score: score,
+                answers: {
+                    user_n: userN
+                }
+            };
+
+            fetch('/api/submit-cps/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    // update attempts-left attribute
+                    document.body.dataset.attemptsLeft = data.attempts_left;
+                } else {
+                    console.error('Submit error', data);
+                }
+            }).catch(err => console.error('Network error', err));
+        }
+
+        // Ensure modal close button works and clicking overlay closes modal
+        document.getElementById('modal-close').addEventListener('click', function() {
+            document.getElementById('res-modal').classList.remove('show');
+        });
+        document.querySelectorAll('.modal').forEach(m => {
+            m.addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('show');
+            });
+        });
+
+        init();
+    </script>
+</body>
+</html>

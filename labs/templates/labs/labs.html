@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% load static %}
 <html lang="uk">
+  
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -41,7 +42,7 @@
     </nav>
     <div class="main-content">
       <div class="labs-grid">
-        {% for lab in labs %}
+        {% for item in lab_items %}
         <div class="lab-card lab-{{ forloop.counter}}">
           <div class="lab-visual">
             <svg
@@ -66,43 +67,32 @@
             </svg>
           </div>
           <div class="lab-content">
-            <h4>{{ lab.title }}</h4>
+            <h4>{{ item.lab.title }}</h4>
             <p class="description">
-              {{ lab.description|default:"Опис відсутній" }}
+              {{ item.lab.description|default:"Опис відсутній" }}
             </p>
             <div class="lab-meta">
               <div class="meta-info">
                 <p>
-                  Оцінка: {% if lab.best_score %}
-                  <span style="color: var(--color-status-done)"
-                    >{{ lab.best_mark }}/{{ lab.max_mark }}</span
-                  >
+                  Оцінка:
+                  {% if item.best_mark %}
+                    <span style="color: var(--color-status-done)">{{ item.best_mark }}/{{ item.lab.max_mark|default:100 }}</span>
                   {% else %}
-                  <span style="opacity: 0.7">-</span>
+                    <span style="opacity: 0.7">-</span>
                   {% endif %}
                 </p>
-                <p>Спроб: <span>{{ lab.attempts_left }}</span></p>
+                <p>Спроб: <span>{{ item.attempts_left }}</span></p>
               </div>
               <div class="action-row">
-                {% if lab.status == 'completed' %}
+                {% if item.status == 'submitted' or item.status == 'completed' %}
                 <span class="btn-lab-action btn-status-badge">Виконано</span>
-                <a href="lab1.html" class="btn-lab-action btn-action"
-                  >Повторити</a
-                >
-                {% elif lab.status == 'in progress' %}
+                <a href="{% url 'lab' item.lab.id %}" class="btn-lab-action btn-action">Повторити</a>
+                {% elif item.status == 'in progress' %}
                 <span class="btn-lab-action btn-status-badge">В процесі</span>
-                <a
-                  href="{% url 'lab' lab.id %}"
-                  class="btn-lab-action btn-action"
-                  >Продовжити</a
-                >
+                <a href="{% url 'lab' item.lab.id %}" class="btn-lab-action btn-action">Продовжити</a>
                 {% else %}
                 <span class="btn-lab-action btn-status-badge">Нова</span>
-                <a
-                  href="{% url 'lab' lab.id %}"
-                  class="btn-lab-action btn-action"
-                  >Розпочати</a
-                >
+                <a href="{% url 'lab' item.lab.id %}" class="btn-lab-action btn-action">Розпочати</a>
                 {% endif %}
               </div>
             </div>
