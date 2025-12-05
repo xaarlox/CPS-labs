@@ -158,7 +158,6 @@
         }
         .btn-reset:hover { background: #95a5a6; }
 
-        /* HUD Stats */
         .hud-panel {
             position: absolute;
             top: 20px;
@@ -202,7 +201,7 @@
 
     </style>
 </head>
-<body data-lab-id="{{ lab.id }}" data-attempts-left="{{ submission.attempts_left }}">
+<body data-lab-id="{{ lab.id }}" data-attempts-left="{{ submission.attempts_left }}" data-best-mark="{{ submission.best_mark|default:0 }}">
 
     <canvas id="simcanvas"></canvas>
 
@@ -256,16 +255,15 @@
     </div>
 
 
-    <!-- Modal для закончившихся попыток -->
+    <!-- Модальне вікно для закінчених спроб -->
     <div id="attempts-over-modal" class="modal">
         <div class="modal-box">
-            <h2> Спроби закінчились</h2>
-            <div class="grade-big" style="color: #e74c3c; font-size: 3rem;">0</div>
-            <div style="font-size: 1.2rem; margin: 20px 0; font-weight: bold; color: #333;">Вам більше не залишилось спроб</div>
+            <h2>Спроби закінчились.</h2>
+            <div class="grade-big" style="color: #e74c3c; font-size: 3rem;">Залишених спроб: 0</div>
             <div style="color: #666; line-height: 1.6;">
                 Ваш найкращий результат: <strong id="final-best-score">--</strong> балів
             </div>
-            <button class="modal-btn" onclick="window.location.href='{% url 'labs' %}'">Повернутися до лабораторій</button>
+            <button class="modal-btn" onclick="window.location.href='{% url 'labs' %}'">Повернутися до робіт</button>
         </div>
     </div>
 
@@ -281,9 +279,9 @@ const Engine = Matter.Engine,
       Vector = Matter.Vector;
 
 /* --- CONFIG & STATE --- */
-const TARGET_DIST = 15.0; // метри
+const TARGET_DIST = 15.0; 
 const GRAVITY_SCALE = 1.0; 
-const SCALE_BASE = 100; // пікселів на метр
+const SCALE_BASE = 100; 
 
 let canvas = document.getElementById('simcanvas');
 let ctx = canvas.getContext('2d');
@@ -392,11 +390,9 @@ function handleCollisions(event) {
         const bodyA = pairs[i].bodyA;
         const bodyB = pairs[i].bodyB;
 
-        // Якщо снаряд вдарився об землю
         if ((bodyA === projectileBody && bodyB === groundBody) || 
             (bodyB === projectileBody && bodyA === groundBody)) {
             
-            // Зупиняємо симуляцію та оцінюємо
             stopSim();
         }
     }
@@ -595,10 +591,11 @@ function drawTarget(x, y, scale) {
 function fire() {
     if (sim.running) return;
     
-    // Проверяем лимит спроб
+    // Перевіряємо ліміт спроб
     const attemptsLeft = parseInt(document.body.dataset.attemptsLeft) || 0;
     if (attemptsLeft <= 0) {
-        document.getElementById('final-best-score').innerText = stats.best.toFixed(0);
+        const bestMark = parseFloat(document.body.dataset.bestMark) || 0;
+        document.getElementById('final-best-score').innerText = Math.round(bestMark);
         document.getElementById('attempts-over-modal').classList.add('show');
         return;
     }
@@ -689,7 +686,7 @@ function calculateScore() {
     let msg = "Промах";
     
     // Критерії оцінки
-    if (dist < 0.2) { score = 100; msg = "ІДЕАЛЬНО!"; } // Булочкa
+    if (dist < 0.2) { score = 100; msg = "ІДЕАЛЬНО!"; }
     else if (dist < 0.5) { score = 95; msg = "Відмінно"; }
     else if (dist < 1.0) { score = 85; msg = "Влучив!"; }
     else if (dist < 2.0) { score = 70; msg = "Поруч"; }
@@ -704,7 +701,7 @@ function calculateScore() {
     document.getElementById('mod-msg').innerText = msg;
     document.getElementById('mod-err').innerText = dist.toFixed(2) + "m";
     
-    // Отправляем результат на сервер
+    // Відправляємо результат на сервер
     submitResultToServer(score, dist);
     
     // Показуємо результат через 200мс для плавності
@@ -713,9 +710,9 @@ function calculateScore() {
     }, 200);
 }
 
-// Функция для отправки результата на сервер
+// Функція для відправки результату на сервер
 function submitResultToServer(score, errorDist) {
-    // Получаем CSRF токен
+    // Отримуємо CSRF токен
     const csrfToken = getCookie('csrftoken');
     const originX = 150;
     let wFactor = (width - 100) / (TARGET_DIST + 2);
@@ -746,8 +743,11 @@ function submitResultToServer(score, errorDist) {
         if (data.success) {
             console.log('Результат успішно відправлений:', data);
             document.getElementById('hud-attempt').innerText = stats.attempts;
-            // Обновляем лимит спроб
+            // Оновлюємо ліміт спроб та найкращий результат
             document.body.dataset.attemptsLeft = data.attempts_left;
+            if (data.best_mark !== undefined) {
+                document.body.dataset.bestMark = data.best_mark;
+            }
         } else {
             console.error('Помилка відправки:', data.error);
         }
@@ -755,7 +755,7 @@ function submitResultToServer(score, errorDist) {
     .catch(error => console.error('Помилка:', error));
 }
 
-// Функция для получения CSRF токена из cookies
+// Функція для отримання CSRF токена з cookies
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

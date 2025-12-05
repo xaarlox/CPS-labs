@@ -6,12 +6,16 @@
     <link rel="stylesheet" href="{% static 'styles/login.css' %}" />
   </head>
   <body>
-    {% if messages %} {% for message in messages %}
-    <div class="alert alert--{{ message.tags }}">
-      <p class="alert__message">{{message}}</p>
-      <button class="alert__close">x</button>
+    {% if messages %}
+    <div class="messages-container">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">
+        <p class="alert__message">{{ message }}</p>
+        <button class="alert__close">x</button>
+      </div>
+      {% endfor %}
     </div>
-    {% endfor %} {% endif %}
+    {% endif %}
     <section>
       {% for i in "x"|rjust:150 %}
       <span></span>

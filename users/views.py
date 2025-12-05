@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
@@ -162,18 +163,21 @@ def editAccount(request):
                 user = password_form.save()
                 update_session_auth_hash(request, user)
                 messages.success(request, 'Пароль успішно змінено!')
-                return redirect('edit-account')
+                return redirect(reverse('edit-account') + '?section=account')
             else:
                 for field, errors in password_form.errors.items():
                     for error in errors:
                         messages.error(request, error)
                 form = ProfileForm(instance=profile)
+                password_form = PasswordChangeForm(user)
+                # Не робимо редирект при помилках - рендеримо сторінку знову
+                # active_section буде використано в шаблоні для відкриття правильної вкладки
         elif 'update_avatar' in request.POST:
             if 'profile_image' in request.FILES:
                 profile.profile_image = request.FILES['profile_image']
                 profile.save()
                 messages.success(request, 'Аватар успішно оновлено!')
-            return redirect('edit-account')
+            return redirect(reverse('edit-account') + '?section=profile')
 
         elif 'update_profile' in request.POST:
             form = ProfileForm(request.POST, request.FILES, instance=profile)
@@ -183,16 +187,25 @@ def editAccount(request):
                 user.last_name = request.POST.get('last_name', user.last_name)
                 user.save()
                 messages.success(request, 'Профіль успішно оновлено!')
-                return redirect('edit-account')
+                return redirect(reverse('edit-account') + '?section=profile')
             else:
                 messages.error(request, 'Сталася помилка під час збереження профілю.')
-            password_form = PasswordChangeForm(user)
+                password_form = PasswordChangeForm(user)
+                # Не робимо редирект при помилках - рендеримо сторінку знову
         else:
             form = ProfileForm(instance=profile)
             password_form = PasswordChangeForm(user)
     else:
         form = ProfileForm(instance=profile)
         password_form = PasswordChangeForm(user)
+
+    # Визначаємо активну вкладку на основі POST параметрів або URL параметра
+    active_section = request.GET.get('section', 'profile')
+    if request.method == 'POST':
+        if 'change_password' in request.POST:
+            active_section = 'account'
+        elif 'update_profile' in request.POST or 'update_avatar' in request.POST:
+            active_section = 'profile'
 
     context = {
         'form': form,
@@ -203,6 +216,7 @@ def editAccount(request):
         'unknown_users': unknown_users,
         'performance_groups': performance_groups,
         'labs_for_performance': labs_for_performance,
+        'active_section': active_section,
     }
     return render(request, 'users/profile_form.html', context)
 
@@ -219,7 +233,7 @@ def admin_edit_user(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Дані користувача успішно оновлено.')
-            return redirect('edit-account')
+            return redirect(reverse('edit-account') + '?section=teacher')
     else:
         form = AdminProfileUpdateForm(instance=profile_obj)
 
@@ -238,7 +252,7 @@ def admin_delete_user(request, pk):
         full_name = profile_obj.name or profile_obj.username
         profile_obj.delete()
         messages.success(request, f'Користувача "{full_name}" видалено.')
-        return redirect('edit-account')
+        return redirect(reverse('edit-account') + '?section=teacher')
 
     context = {'profile_to_delete': profile_obj}
     return render(request, 'users/admin_confirm_delete.html', context)
@@ -288,7 +302,7 @@ def admin_edit_attempts(request, pk):
                 submission.save()
 
         messages.success(request, 'Кількість спроб для студента оновлено.')
-        return redirect('edit-account')
+        return redirect(reverse('edit-account') + '?section=performance')
 
     context = {
         'student_profile': student_profile,

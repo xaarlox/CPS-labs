@@ -481,13 +481,14 @@ select option {
 
 .alert {
   position: fixed;
-  top: 20px;
+  top: 80px;
   right: 20px;
-  background: rgba(34, 34, 34, 0.95);
-  border-left: 4px solid var(--color-primary);
-  padding: 1rem 3rem 1rem 1.5rem;
+  background: rgba(47, 47, 47, 0.95);
+  backdrop-filter: blur(10px);
+  border-left: 4px solid var(--color-accent);
+  padding: 1rem 1.5rem 1rem 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   z-index: 9999;
   min-width: 300px;
   max-width: 500px;
@@ -519,41 +520,58 @@ select option {
   transform: translateY(-50%);
   background: transparent;
   border: none;
-  color: var(--color-primary);
+  color: var(--color-text-dim);
   font-size: 1.5rem;
   font-weight: bold;
   cursor: pointer;
   opacity: 0.7;
-  transition: opacity 0.2s;
+  transition: all 0.2s;
   padding: 0;
   width: 24px;
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
 }
 
 .alert__close:hover {
   opacity: 1;
-  color: var(--color-accent);
+  color: var(--color-light);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .alert.alert-success {
-  background: rgba(76, 175, 80, 0.15);
-  border-left-color: #4caf50;
+  background: rgba(47, 47, 47, 0.95);
+  backdrop-filter: blur(10px);
+  border-left-color: var(--color-accent);
+}
+
+.alert.alert-success .alert__message {
+  color: var(--color-accent);
 }
 
 .alert.alert-error {
-  background: rgba(244, 67, 54, 0.15);
-  border-left-color: #f44336;
+  background: rgba(47, 47, 47, 0.95);
+  backdrop-filter: blur(10px);
+  border-left-color: #e74c3c;
 }
 
 .alert.alert-error .alert__message {
   color: #ff6b6b;
 }
 
+.alert.alert-error .alert__close {
+  color: #c0392b;
+}
+
+.alert.alert-error .alert__close:hover {
+  color: #e74c3c;
+}
+
 .alert.alert-warning {
-  background: rgba(255, 152, 0, 0.15);
+  background: rgba(47, 47, 47, 0.95);
+  backdrop-filter: blur(10px);
   border-left-color: #ff9800;
 }
 
@@ -562,16 +580,21 @@ select option {
 }
 
 .alert.alert-info {
-  background: rgba(79, 115, 92, 0.15);
-  border-left-color: var(--color-primary);
+  background: rgba(47, 47, 47, 0.95);
+  backdrop-filter: blur(10px);
+  border-left-color: var(--color-accent);
+}
+
+.alert.alert-info .alert__message {
+  color: var(--color-light);
 }
 
 .alert:nth-child(2) {
-  top: 100px;
+  top: 160px;
 }
 
 .alert:nth-child(3) {
-  top: 180px;
+  top: 240px;
 }
 
 @media (max-width: 768px) {

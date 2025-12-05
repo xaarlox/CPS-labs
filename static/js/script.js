@@ -80,7 +80,24 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  showSection("profile");
+  // Перевіряємо URL параметр section або data-атрибут з body
+  const urlParams = new URLSearchParams(window.location.search);
+  const sectionParam = urlParams.get("section");
+  const bodySection = document.body.getAttribute("data-active-section");
+  const defaultSection = "profile";
+  const targetSection = sectionParam || bodySection || defaultSection;
+
+  // Знаходимо відповідний пункт меню і робимо його активним
+  navLinks.forEach((link) => {
+    const linkSection = link.getAttribute("data-section");
+    if (linkSection === targetSection) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
+  });
+
+  showSection(targetSection);
 
   const avatarInput = document.getElementById("avatar-upload-input");
   const avatarForm = document.getElementById("avatar-form");

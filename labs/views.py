@@ -16,7 +16,7 @@ def labs(request):
 
     lab_items = []
     for lab in labs_qs:
-        # Для текущего пользователя ищем submission, если есть
+        # Для поточного користувача шукаємо submission, якщо є
         submission = None
         try:
             submission = Submission.objects.filter(lab=lab, profile=request.user.profile).first()
@@ -68,19 +68,21 @@ def cps_simulation(request, pk):
     # Вибираємо шаблон залежно від назви лаби
     title_lower = lab.title.lower()
     
-    if 'балістик' in title_lower or 'баллистик' in title_lower:
+    if 'балістик' in title_lower or 'снаряд' in title_lower or 'ballistics' in title_lower:
         template = 'labs/ballistics_simulation.html'
     elif 'термод' in title_lower or 'термодинам' in title_lower:
         template = 'labs/Termodynamika.html'
+    elif 'оптик' in title_lower or 'світло' in title_lower or 'light' in title_lower:
+        template = 'labs/light.html'
     elif 'маятник' in title_lower:
         template = 'labs/pendulum_simulation.html'
     elif 'спутник' in title_lower:
         template = 'labs/satellite_simulation.html'
     elif 'електр' in title_lower or 'струм' in title_lower or 'електрика' in title_lower or 'електрич' in title_lower:
         template = 'labs/electronics_simulation.html'
-    elif 'електромагнітне' in title_lower or 'электромагнитное' in title_lower:
+    elif 'електромагнітне' in title_lower:
         template = 'labs/electromagnetic_simulation.html'
-    elif 'хвилі' in title_lower or 'волны' in title_lower:
+    elif 'хвилі' in title_lower:
         template = 'labs/wave_simulation.html'
     else:
         template = 'labs/cps_simulation.html'

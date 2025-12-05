@@ -26,16 +26,33 @@ try:
     print("Всі старі лаби видалені")
 
     lab = Lab.objects.create(
-        title="Балістика",
+        title="Рух снаряда",
         description="Лабораторна робота: Балістична траєкторія. Розрахуйте оптимальні параметри пострілу для влучення снаряда в ціль з урахуванням опору повітря. Маса снаряда — 2 кг, радіус — 0.15 м. Ціль розташована на 15 м з висотою 2 м. Визначте кут та початкову швидкість.",
         order=1,
         passing_mark=60,
         max_mark=100,
-        max_attempts=10,
+        max_attempts=2,
         deadline=timezone.now() + timedelta(days=30),
         is_active=True,
     )
     print(f"Лаба додана: {lab.title} (ID: {lab.id})")
+
+    optics = Lab.objects.create(
+        title="Оптика",
+        description=(
+            "Лабораторна робота: Закон відбиття світла. "
+            "Налаштуйте кут дзеркала та кут падаючого променя, спостерігайте відбитий промінь. "
+            "Обчисліть кут відбиття γ, дотримуючись закону відбиття (кут падіння = кут відбиття). "
+            "Інтерактивна симуляція показує дзеркало, падаючий та відбитий промені, нормаль та всі необхідні кути."
+        ),
+        order=2,
+        passing_mark=60,
+        max_mark=100,
+        max_attempts=2,
+        deadline=timezone.now() + timedelta(days=30),
+        is_active=True,
+    )
+    print(f"Лаба додана: {optics.title} (ID: {optics.id})")
 
     thermo = Lab.objects.create(
         title="Термодинаміка",
@@ -44,10 +61,10 @@ try:
             "Керуйте об'ємом і температурою, виміряйте тиск і обчисліть кількість речовини n за законом ідеального газу (pV = nRT). "
             "Інтерактивна симуляція містить поршень, індикатори тиску/об'єму/температури і поле для введення n."
         ),
-        order=2,
+        order=3,
         passing_mark=50,
         max_mark=100,
-        max_attempts=5,
+        max_attempts=2,
         deadline=timezone.now() + timedelta(days=30),
         is_active=True,
     )

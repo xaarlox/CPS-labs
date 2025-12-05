@@ -37,7 +37,7 @@
             <form method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn-small btn-danger">Так, видалити</button>
-                <a href="{% url 'edit-account' %}" class="btn-small" style="margin-left: 12px;">Скасувати</a>
+                <a href="{% url 'edit-account' %}?section=teacher" class="btn-small" style="margin-left: 12px;">Скасувати</a>
             </form>
         </section>
     </main>

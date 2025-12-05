@@ -10,12 +10,12 @@
     />
     <link rel="stylesheet" href="{% static 'styles/user.css' %}"/>
 </head>
-<body>
+<body data-active-section="{{ active_section|default:'profile' }}">
     <!-- Повідомлення -->
     {% if messages %}
         <div class="messages-container">
             {% for message in messages %}
-                <div class="alert alert--{{ message.tags }}">
+                <div class="alert alert-{{ message.tags }}">
                     <p class="alert__message">{{ message }}</p>
                     <button class="alert__close">x</button>
                 </div>
