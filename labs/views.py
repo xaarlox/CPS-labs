@@ -72,6 +72,8 @@ def cps_simulation(request, pk):
         template = 'labs/ballistics_simulation.html'
     elif 'термод' in title_lower or 'термодинам' in title_lower:
         template = 'labs/Termodynamika.html'
+    elif 'оптик' in title_lower or 'світло' in title_lower or 'light' in title_lower:
+        template = 'labs/light.html'
     elif 'маятник' in title_lower:
         template = 'labs/pendulum_simulation.html'
     elif 'спутник' in title_lower:

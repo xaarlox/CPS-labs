@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оптика - Симуляція</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Theme Colors (Dark/Green) */
+            --color-dark: #2f2f2f;
+            --color-light: #f2ede7;
+            --gradient-start: #4f735c;
+            --gradient-end: #6ca082;
+            --color-card-bg: rgba(58, 58, 58, 0.95); /* Полупрозрачный фон панели */
+            --color-accent: #6ca082;
+            --color-action-btn-main: #385642;
+            --color-action-btn-hover: #2a4032;
+            --border-light: rgba(255, 255, 255, 0.15);
+            
+            /* Optics Specific */
+            --ray-incident: #f72585;
+            --ray-reflected: #f8961e;
+            --color-normal: #a0a0a0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--color-dark);
+            color: var(--color-light);
+            font-family: 'Ubuntu', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- CANVAS (FULL SCREEN) --- */
+        #simCanvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            background: radial-gradient(circle at 50% 60%, #3a3a3a, #2f2f2f);
+            cursor: crosshair;
+        }
+
+        /* --- FLOATING PANEL --- */
+        .ui-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 320px;
+            background: var(--color-card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        /* HEADERS */
+        .panel-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        /* CONTROLS */
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        
+        .label-row { 
+            display: flex; justify-content: space-between; 
+            font-weight: 500; font-size: 0.9rem; color: #ccc; 
+        }
+        
+        .val-badge {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(108, 160, 130, 0.2);
+            padding: 2px 6px; border-radius: 4px;
+            color: var(--color-light); font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        /* SLIDERS */
+        input[type="range"] {
+            width: 100%; height: 6px;
+            background: #222; border-radius: 3px;
+            outline: none; -webkit-appearance: none; cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 18px; height: 18px;
+            background: var(--color-accent);
+            border: 2px solid #fff; border-radius: 50%;
+            margin-top: -6px; transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+
+        /* CHECKBOX */
+        .toggle-row {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.9rem; color: #ccc; cursor: pointer;
+            margin-top: 5px;
+        }
+        .toggle-row input {
+            accent-color: var(--color-accent); width: 16px; height: 16px;
+        }
+
+        /* LEGEND */
+        .legend-inline {
+            display: flex; flex-direction: column; gap: 8px;
+            padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #ccc; }
+        .legend-line { width: 20px; height: 3px; border-radius: 2px; }
+
+        /* ANSWER INPUT */
+        .answer-section {
+            border-top: 1px solid var(--border-light);
+            padding-top: 20px;
+            margin-top: 10px;
+        }
+        .subtitle { font-size: 0.9rem; margin-bottom: 12px; color: #ccc; font-weight: 500; }
+
+        .input-row {
+            display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px;
+            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px;
+            border: 1px solid var(--border-light);
+        }
+        input[type="number"] {
+            width: 80px; background: transparent; border: none;
+            color: var(--color-light); text-align: center;
+            font-family: 'JetBrains Mono'; font-size: 1.2rem; font-weight: 700; outline: none;
+            border-bottom: 1px solid var(--color-accent);
+            padding: 0; margin: 0;
+        }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .btn-submit {
+            width: 100%; padding: 12px;
+            background-color: var(--color-action-btn-main);
+            color: var(--color-light);
+            border: none; border-radius: 6px;
+            font-weight: 600; cursor: pointer; transition: 0.3s;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-submit:hover { background-color: var(--color-action-btn-hover); }
+
+        .feedback {
+            margin-top: 15px; padding: 10px; border-radius: 4px;
+            text-align: center; font-weight: bold; display: none; font-size: 0.9rem;
+        }
+        .feedback.success { background: rgba(108, 160, 130, 0.2); color: #86efac; border: 1px solid var(--color-accent); }
+        .feedback.error { background: rgba(220, 38, 38, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+
+        /* Modal (same style as Termodynamika) */
+        .modal {
+            display: none;
+            position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            align-items: center; justify-content: center;
+        }
+        .modal.show { display: flex; }
+        .modal-box {
+            background: #fff; padding: 30px; border-radius: 8px;
+            text-align: center; border: 4px solid #2c3e50;
+            box-shadow: 10px 10px 0 rgba(0,0,0,0.2);
+            animation: popIn 0.3s ease;
+            min-width: 300px; max-width: 90%;
+            color: #2c3e50;
+        }
+        @keyframes popIn { from {transform: scale(0.5); opacity:0;} to {transform: scale(1); opacity:1;} }
+        .grade-big { font-size: 4rem; font-weight: 800; color: #27ae60; margin: 10px 0; }
+        .modal-box h2 { font-size: 1.6rem; margin-bottom: 6px; font-weight: 800; color: #2c3e50; }
+        .modal-btn { background: #2c3e50; color: white; border: none; padding: 12px 30px; font-size: 1.1rem; border-radius: 4px; cursor: pointer; margin-top: 20px; }
+
+        @media (max-width: 600px) {
+            .ui-panel { width: calc(100% - 40px); top: auto; bottom: 20px; max-height: 50vh; }
+        }
+    </style>
+</head>
+<body data-lab-id="{{ lab.id }}" data-attempts-left="{{ submission.attempts_left }}">
+
+    <canvas id="simCanvas"></canvas>
+
+    <!-- FLOATING PANEL -->
+    <div class="ui-panel">
+        <div class="panel-header">Налаштування
+            <span style="font-size: 0.8rem; opacity: 0.8; float: right;">Спроб: <span id="hud-attempts">0</span></span>
+        </div>
+        
+        <div class="control-group">
+            <div class="label-row">
+                <span>Кут дзеркала (φ)</span>
+                <span class="val-badge" id="val-phi">50°</span>
+            </div>
+            <input type="range" id="rng-phi" min="20" max="70" step="1" value="50">
+        </div>
+
+        <div class="control-group">
+            <div class="label-row">
+                <span>Кут променя (α)</span>
+                <span class="val-badge" id="val-ray" style="color:var(--ray-incident); background:rgba(247,37,133,0.15)">90°</span>
+            </div>
+            <input type="range" id="rng-ray" min="50" max="130" step="1" value="90">
+        </div>
+
+        <label class="toggle-row">
+            <input type="checkbox" id="chk-details" checked>
+            Показати нормаль та кути
+        </label>
+
+        <div class="legend-inline">
+            <div class="legend-item"><div class="legend-line" style="background:var(--ray-incident); box-shadow:0 0 5px var(--ray-incident);"></div> Падаючий промінь</div>
+            <div class="legend-item"><div class="legend-line" style="background:var(--ray-reflected); box-shadow:0 0 5px var(--ray-reflected);"></div> Відбитий промінь (γ)</div>
+            <div class="legend-item"><div class="legend-line" style="background:var(--color-normal); border-top:1px dashed #fff;"></div> Нормаль</div>
+        </div>
+
+        <div class="answer-section">
+            <div class="subtitle">Введіть кут відбиття (γ):</div>
+            <div class="input-row">
+                <span style="font-family:'JetBrains Mono'; font-weight:bold; color:#888;">γ =</span>
+                <input type="number" id="inp-ans" placeholder="?" autocomplete="off">
+                <span style="font-family:'JetBrains Mono'; font-weight:bold; color:#888;">°</span>
+            </div>
+            <button class="btn-submit" onclick="checkAnswer()">Перевірити</button>
+            <div id="feedback" class="feedback"></div>
+        </div>
+    </div>
+
+    <!-- Result modal (same style as Termodynamika) -->
+    <div id="res-modal" class="modal">
+        <div class="modal-box">
+            <h2>Результат</h2>
+            <div class="grade-big" id="mod-grade">--</div>
+            <div id="mod-msg" style="font-size:1.1rem; margin-bottom:8px; font-weight:700;">--</div>
+            <div id="mod-err" style="display:none;"></div>
+            <button class="modal-btn" id="modal-close">Закрити</button>
+        </div>
+    </div>
+
+    <!-- Modal для закончившихся попыток -->
+    <div id="attempts-over-modal" class="modal">
+        <div class="modal-box">
+            <h2>Спроби закінчились</h2>
+            <div class="grade-big" style="color: #e74c3c; font-size: 3rem;">0</div>
+            <div style="font-size: 1.2rem; margin: 20px 0; font-weight: bold; color: #333;">Вам більше не залишилось спроб</div>
+            <div style="color: #666; line-height: 1.6;">
+                Ваш найкращий результат: <strong id="final-best-score">--</strong> балів
+            </div>
+            <button class="modal-btn" onclick="window.location.href='{% url 'labs' %}'">Повернутися до лабораторій</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const state = {
+            phi: 50,
+            rayInc: 90,
+            trueGamma: 0,
+            showDetails: true
+        };
+
+        const els = {
+            phi: document.getElementById('rng-phi'),
+            ray: document.getElementById('rng-ray'),
+            chkDetails: document.getElementById('chk-details'),
+            valPhi: document.getElementById('val-phi'),
+            valRay: document.getElementById('val-ray'),
+            ans: document.getElementById('inp-ans'),
+            feedback: document.getElementById('feedback')
+        };
+
+        function toRad(deg) { return deg * Math.PI / 180; }
+        function toDeg(rad) { return rad * 180 / Math.PI; }
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            draw();
+        }
+        window.addEventListener('resize', resize);
+
+        function draw() {
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            // BG Gradient (Full Screen)
+            const gradBg = ctx.createRadialGradient(w/2, h/2, 50, w/2, h/2, 800);
+            gradBg.addColorStop(0, '#353535');
+            gradBg.addColorStop(1, '#2a2a2a');
+            ctx.fillStyle = gradBg;
+            ctx.fillRect(0, 0, w, h);
+
+            // --- Grid ---
+            ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+            ctx.lineWidth = 1;
+            const gridSize = 40;
+            ctx.beginPath();
+            for(let x=0; x<w; x+=gridSize) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
+            for(let y=0; y<h; y+=gridSize) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
+            ctx.stroke();
+
+            // --- SCENE COORDS ---
+            const floorY = h - 100;
+            // Shift center left to make room for panel
+            const centerX = w > 800 ? (w - 360) / 2 : w / 2;
+            const hitX = centerX;
+            const hitY = floorY - 200;
+
+            // 1. FLOOR
+            ctx.beginPath();
+            ctx.moveTo(0, floorY); ctx.lineTo(w, floorY);
+            ctx.strokeStyle = '#666'; ctx.lineWidth = 2; ctx.stroke();
+
+            // 2. MIRROR
+            const phiRad = toRad(state.phi);
+            const mx = Math.cos(phiRad);
+            const my = Math.sin(phiRad);
+
+            // Calculate Mirror Bottom
+            const dyBot = floorY - hitY;
+            const dxBot = dyBot / Math.tan(phiRad);
+            const mBotX = hitX + dxBot;
+            
+            // Top point
+            const mTopX = hitX - mx * 180;
+            const mTopY = hitY - my * 180;
+
+            // Mirror Body
+            ctx.beginPath();
+            ctx.moveTo(mTopX, mTopY);
+            ctx.lineTo(mBotX, floorY);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Hatching
+            ctx.beginPath();
+            const steps = 35;
+            const dx = (mBotX - mTopX) / steps;
+            const dy = (floorY - mTopY) / steps;
+            const tickX = -my * 8;
+            const tickY = mx * 8;
+            for(let i=1; i<steps; i++) {
+                const px = mTopX + dx*i;
+                const py = mTopY + dy*i;
+                ctx.moveTo(px, py);
+                ctx.lineTo(px + tickX, py + tickY);
+            }
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Angle Phi
+            const angMirror = Math.atan2(mTopY - floorY, mTopX - mBotX);
+            drawAngleSector(mBotX, floorY, 50, Math.PI, angMirror, state.phi + "°", '#aaa');
+
+            // 3. NORMAL
+            const nx = Math.sin(phiRad);
+            const ny = -Math.cos(phiRad);
+
+            if (state.showDetails) {
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(hitX, hitY);
+                ctx.lineTo(hitX + nx * 150, hitY + ny * 150);
+                ctx.strokeStyle = '#a0a0a0';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // 4. INCIDENT RAY
+            const rayRad = toRad(state.rayInc);
+            const ix = Math.cos(rayRad);
+            const iy = Math.sin(rayRad);
+            const rayLen = 300;
+            
+            drawLaser(hitX - ix*rayLen, hitY - iy*rayLen, hitX, hitY, '#f72585');
+
+            // 5. REFLECTED RAY
+            const dot = ix * nx + iy * ny;
+            const rx = ix - 2 * dot * nx;
+            const ry = iy - 2 * dot * ny;
+            
+            const isBlocked = (dot >= 0);
+
+            if(!isBlocked) {
+                let groundHitX = 0;
+                let groundHitY = floorY;
+                let hitsFloor = false;
+
+                if (ry > 0.001) {
+                    const t = (floorY - hitY) / ry;
+                    groundHitX = hitX + rx * t;
+                    hitsFloor = true;
+                } else {
+                    groundHitX = hitX + rx * 2000;
+                    groundHitY = hitY + ry * 2000;
+                }
+
+                drawLaser(hitX, hitY, groundHitX, groundHitY, '#f8961e');
+
+                // Angles
+                const angNorm = Math.atan2(ny, nx);
+                const angIncInv = Math.atan2(-iy, -ix);
+                const angRef = Math.atan2(ry, rx);
+
+                if(state.showDetails) {
+                    drawAngleSector(hitX, hitY, 40, angNorm, angIncInv, 'α', '#f72585', true);
+                    drawAngleSector(hitX, hitY, 55, angRef, angNorm, 'β', '#f8961e', true);
+                }
+
+                // GAMMA
+                let gammaDeg = Math.abs(toDeg(angRef));
+                if(gammaDeg > 180) gammaDeg = 360 - gammaDeg;
+                if(gammaDeg > 90) gammaDeg = 180 - gammaDeg;
+                state.trueGamma = Math.round(gammaDeg);
+
+                if(hitsFloor && groundHitX < w + 200) {
+                    const angRayBack = Math.atan2(-ry, -rx);
+                    drawAngleSector(groundHitX, groundHitY, 50, Math.PI, angRayBack, 'γ', '#f8961e');
+                } else {
+                    // Helper horizon
+                    ctx.beginPath();
+                    ctx.setLineDash([2, 2]);
+                    ctx.moveTo(hitX, hitY); ctx.lineTo(hitX + 100, hitY);
+                    ctx.strokeStyle = '#555'; ctx.stroke(); ctx.setLineDash([]);
+                }
+            } else {
+                ctx.fillStyle = '#ef4444';
+                ctx.font = "bold 16px Ubuntu";
+                ctx.fillText("Промінь за дзеркалом!", hitX + 20, hitY - 20);
+                state.trueGamma = null;
+            }
+        }
+
+        // --- UTILS ---
+        function drawLaser(x1, y1, x2, y2, color) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 15;
+            ctx.stroke();
+            
+            // Arrow
+            const head = 12;
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const midX = x1 + (x2 - x1) * 0.55;
+            const midY = y1 + (y2 - y1) * 0.55;
+            
+            ctx.beginPath();
+            ctx.moveTo(midX, midY);
+            ctx.lineTo(midX - head * Math.cos(angle - Math.PI/6), midY - head * Math.sin(angle - Math.PI/6));
+            ctx.lineTo(midX - head * Math.cos(angle + Math.PI/6), midY - head * Math.sin(angle + Math.PI/6));
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawAngleSector(x, y, r, start, end, label, color, isSmall = false) {
+            let diff = end - start;
+            while (diff <= -Math.PI) diff += 2*Math.PI;
+            while (diff > Math.PI) diff -= 2*Math.PI;
+
+            ctx.beginPath();
+            ctx.arc(x, y, r, start, start + diff, diff < 0);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Fill
+            ctx.lineTo(x, y);
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.15;
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+
+            // Text
+            const mid = start + diff / 2;
+            const tx = x + (r + 15) * Math.cos(mid);
+            const ty = y + (r + 15) * Math.sin(mid);
+            
+            ctx.fillStyle = color;
+            ctx.font = "bold 14px Ubuntu";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(label, tx, ty);
+        }
+
+        // --- UPDATE ---
+        function update() {
+            state.phi = parseFloat(els.phi.value);
+            state.rayInc = parseFloat(els.ray.value);
+            state.showDetails = els.chkDetails.checked;
+
+            els.valPhi.textContent = state.phi + "°";
+            els.valRay.textContent = state.rayInc + "°";
+            els.feedback.style.display = 'none';
+            els.ans.value = '';
+
+            draw();
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function checkAnswer() {
+            // Проверяем лимит спроб
+            const attemptsLeft = parseInt(document.body.dataset.attemptsLeft) || 0;
+            if (attemptsLeft <= 0) {
+                document.getElementById('final-best-score').innerText = '0';
+                document.getElementById('attempts-over-modal').classList.add('show');
+                return;
+            }
+
+            if (state.trueGamma === null) return;
+            const val = parseFloat(els.ans.value);
+            if (isNaN(val)) return;
+
+            const diff = Math.abs(val - state.trueGamma);
+            let score = 0;
+            let text = 'Невірно';
+
+            if (diff <= 1) { score = 100; text = 'Ідеально'; }
+            else if (diff <= 3) { score = 95; text = 'Правильно'; }
+            else if (diff <= 6) { score = 80; text = 'Добре'; }
+            else if (diff <= 12) { score = 60; text = 'Погано'; }
+            else { score = 40; text = 'Невірно'; }
+
+            // show modal
+            const modal = document.getElementById('res-modal');
+            const gradeEl = document.getElementById('mod-grade');
+            const msgEl = document.getElementById('mod-msg');
+            const errEl = document.getElementById('mod-err');
+
+            gradeEl.innerText = score;
+            msgEl.innerText = `${text}`;
+            errEl.innerText = '';
+            modal.classList.add('show');
+
+            // send to server
+            const csrfToken = getCookie('csrftoken');
+            const payload = {
+                lab_id: document.body.dataset.labId || null,
+                score: score,
+                answers: { gamma: val }
+            };
+
+            fetch('/api/submit-cps/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(payload)
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    if (data.attempts_left !== undefined) {
+                        document.body.dataset.attemptsLeft = data.attempts_left;
+                        document.getElementById('hud-attempts').innerText = data.attempts_left;
+                    }
+                } else {
+                    console.error('Submit error', data);
+                }
+            }).catch(err => console.error('Network error', err));
+        }
+
+        function showFeedback(type, text) {
+            els.feedback.className = `feedback ${type}`;
+            els.feedback.textContent = text;
+            els.feedback.style.display = 'block';
+        }
+
+        // Initialize attempts counter
+        const initialAttempts = parseInt(document.body.dataset.attemptsLeft) || 0;
+        document.getElementById('hud-attempts').innerText = initialAttempts;
+
+        els.phi.addEventListener('input', update);
+        els.ray.addEventListener('input', update);
+        els.chkDetails.addEventListener('change', update);
+
+        // modal close button and overlay click
+        document.getElementById('modal-close').addEventListener('click', function() {
+            document.getElementById('res-modal').classList.remove('show');
+        });
+        document.querySelectorAll('.modal').forEach(m => {
+            m.addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('show');
+            });
+        });
+
+        init();
+        function init() { resize(); }
+
+    </script>
+</body>
+</html>

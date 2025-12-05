@@ -158,7 +158,6 @@
         }
         .btn-reset:hover { background: #95a5a6; }
 
-        /* HUD Stats */
         .hud-panel {
             position: absolute;
             top: 20px;
@@ -281,9 +280,9 @@ const Engine = Matter.Engine,
       Vector = Matter.Vector;
 
 /* --- CONFIG & STATE --- */
-const TARGET_DIST = 15.0; // метри
+const TARGET_DIST = 15.0; 
 const GRAVITY_SCALE = 1.0; 
-const SCALE_BASE = 100; // пікселів на метр
+const SCALE_BASE = 100; 
 
 let canvas = document.getElementById('simcanvas');
 let ctx = canvas.getContext('2d');
@@ -392,11 +391,9 @@ function handleCollisions(event) {
         const bodyA = pairs[i].bodyA;
         const bodyB = pairs[i].bodyB;
 
-        // Якщо снаряд вдарився об землю
         if ((bodyA === projectileBody && bodyB === groundBody) || 
             (bodyB === projectileBody && bodyA === groundBody)) {
             
-            // Зупиняємо симуляцію та оцінюємо
             stopSim();
         }
     }

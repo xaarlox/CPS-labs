@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Basic Theme Colors */
             --color-dark: #2f2f2f;
             --color-light: #f2ede7;
             --gradient-start: #4f735c;
@@ -18,7 +17,6 @@
             --color-action-btn-main: #385642;
             --color-action-btn-hover: #2a4032;
             
-            /* Sim Specific */
             --border: rgba(255, 255, 255, 0.15);
             --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
@@ -28,7 +26,7 @@
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Sim needs fixed screen */
+            overflow: hidden; 
             font-family: 'Ubuntu', sans-serif;
             background-color: var(--color-dark);
             color: var(--color-light);
@@ -37,7 +35,6 @@
             height: 100vh;
         }
 
-        /* --- MAIN LAYOUT --- */
         .workspace {
             flex: 1;
             position: relative;
@@ -46,7 +43,6 @@
             overflow: hidden;
         }
 
-        /* --- CANVAS --- */
         #simCanvas {
             position: absolute;
             top: 0; left: 0;
@@ -55,7 +51,6 @@
             background: radial-gradient(circle at 50% 60%, #3a3a3a, #2f2f2f);
         }
 
-        /* --- UI LAYER --- */
         .ui-layer {
             position: relative;
             z-index: 10;
@@ -64,10 +59,9 @@
             padding: 20px;
             display: flex;
             justify-content: space-between;
-            pointer-events: none; /* Let clicks pass to canvas */
+            pointer-events: none; 
         }
 
-        /* --- PANELS --- */
         .panel {
             pointer-events: auto;
             background: var(--color-card-bg);
@@ -82,7 +76,6 @@
             backdrop-filter: blur(5px);
         }
 
-        /* HEADERS & LABELS */
         .panel-header {
             font-size: 1.1rem;
             font-weight: 700;
@@ -109,7 +102,6 @@
             font-size: 0.85rem;
         }
 
-        /* SLIDERS */
         input[type="range"] {
             width: 100%; height: 6px;
             background: #222;
@@ -127,7 +119,6 @@
         }
         input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
 
-        /* GAUGES */
         .gauge-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -147,7 +138,6 @@
         }
         .gauge-unit { font-size: 0.75rem; color: var(--color-accent); }
 
-        /* ANSWER BOX */
         .answer-box {
             margin-top: auto;
             border-top: 1px solid var(--border);
@@ -158,7 +148,7 @@
         .input-wrapper {
             display: flex; 
             align-items: center; 
-            justify-content: center; /* Центрируем содержимое */
+            justify-content: center;
             gap: 10px; 
             margin-bottom: 15px;
             background: rgba(0,0,0,0.2);
@@ -168,10 +158,10 @@
         }
         
         input[type="number"] {
-            width: 80px; /* Фиксированная маленькая ширина */
+            width: 80px; 
             background: transparent; 
             border: none;
-            border-bottom: 1px solid var(--color-accent); /* Подчеркивание для акцента */
+            border-bottom: 1px solid var(--color-accent); 
             color: var(--color-light); 
             text-align: center;
             font-family: 'JetBrains Mono'; 
@@ -182,7 +172,6 @@
             margin: 0;
         }
         
-        /* HIDE SPINNER BUTTONS */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -210,21 +199,21 @@
         .feedback.success { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #86efac; }
         .feedback.error { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; }
 
-        /* Modal (exact from ballistics_simulation) */
         .modal {
             display: none;
             position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.6);
             align-items: center; justify-content: center;
+            pointer-events: none;
         }
-        .modal.show { display: flex; }
+        .modal.show { display: flex; pointer-events: auto; }
+
         .modal-box {
             background: #fff; padding: 30px; border-radius: 8px;
             text-align: center; border: 4px solid #2c3e50;
             box-shadow: 10px 10px 0 rgba(0,0,0,0.2);
             animation: popIn 0.3s ease;
             min-width: 300px; max-width: 90%;
-            /* Force dark text inside modal to match ballistics style */
             color: #2c3e50;
         }
         @keyframes popIn { from {transform: scale(0.5); opacity:0;} to {transform: scale(1); opacity:1;} }
@@ -232,7 +221,6 @@
         .modal-box h2 { font-size: 1.6rem; margin-bottom: 6px; font-weight: 800; color: #2c3e50; }
         .modal-btn { background: #2c3e50; color: white; border: none; padding: 12px 30px; font-size: 1.1rem; border-radius: 4px; cursor: pointer; margin-top: 20px; }
 
-        /* Tip Box */
         .tip-box {
             font-size: 0.85rem; color: #aaa;
             background: rgba(79, 115, 92, 0.15);
@@ -254,7 +242,9 @@
         <div class="ui-layer">
             <!-- LEFT: CONTROLS -->
             <div class="panel">
-                <div class="panel-header">Налаштування</div>
+                <div class="panel-header">Налаштування
+                    <span style="font-size: 0.8rem; opacity: 0.8; float: right;">Спроб: <span id="hud-attempts">0</span></span>
+                </div>
                 
                 <div class="control-group">
                     <div class="label-row"><label>ТЕМПЕРАТУРА (T)</label> <span class="val-badge" id="val-temp">300 K</span></div>
@@ -275,6 +265,19 @@
                         <div id="mod-msg" style="font-size:1.1rem; margin-bottom:8px; font-weight:700;">--</div>
                         <div id="mod-err" style="display:none;"></div>
                         <button class="modal-btn" id="modal-close">Закрити</button>
+                    </div>
+                </div>
+
+                <!-- Modal для закончившихся попыток -->
+                <div id="attempts-over-modal" class="modal">
+                    <div class="modal-box">
+                        <h2>Спроби закінчились</h2>
+                        <div class="grade-big" style="color: #e74c3c; font-size: 3rem;">0</div>
+                        <div style="font-size: 1.2rem; margin: 20px 0; font-weight: bold; color: #333;">Вам більше не залишилось спроб</div>
+                        <div style="color: #666; line-height: 1.6;">
+                            Ваш найкращий результат: <strong id="final-best-score">--</strong> балів
+                        </div>
+                        <button class="modal-btn" onclick="window.location.href='{% url 'labs' %}'">Повернутися до лабораторій</button>
                     </div>
                 </div>
 
@@ -318,11 +321,10 @@
         const canvas = document.getElementById('simCanvas');
         const ctx = canvas.getContext('2d');
 
-        // --- CONSTANTS ---
+
         const R_GAS = 8.31; 
         const MOLES_SECRET = (2 + Math.random() * 3); 
         
-        // --- STATE ---
         const state = {
             T: 300,         
             V_L: 200,       
@@ -345,7 +347,6 @@
             feedback: document.getElementById('feedback')
         };
 
-        // --- INIT ---
         function init() {
             resize();
             window.addEventListener('resize', resize);
@@ -382,7 +383,6 @@
             updatePistonFromVolume();
         }
 
-        // --- PHYSICS ---
         function updatePhysicsLogic() {
             state.P_kPa = (MOLES_SECRET * R_GAS * state.T) / state.V_L;
             state.speedFactor = Math.sqrt(state.T) * 0.15;
@@ -398,7 +398,6 @@
             state.pistonY = state.container.groundY - state.V_L;
         }
 
-        // --- LOOP ---
         function loop() {
             state.time += 0.05;
             state.T = parseInt(els.rngTemp.value);
@@ -413,7 +412,6 @@
 
             drawHeater();
 
-            // Container Back
             ctx.fillStyle = 'rgba(255, 255, 255, 0.05)'; 
             ctx.fillRect(state.container.x, state.container.groundY - 600, state.container.w, 600);
             
@@ -449,7 +447,6 @@
                 if (p.y > floor - p.r) { p.y = floor - p.r; p.vy *= -1; }
                 if (p.y < ceil + p.r) { p.y = ceil + p.r; p.vy *= -1; }
 
-                // Temperature Colors (Blue -> Red) suitable for dark theme
                 const tRatio = (state.T - 100) / 500;
                 const r = Math.floor(tRatio * 255);
                 const b = Math.floor((1 - tRatio) * 255);
@@ -468,16 +465,13 @@
             const x = state.container.x;
             const w = state.container.w;
 
-            // Body
             ctx.fillStyle = '#4a4a4a';
             ctx.fillRect(x + 2, y - h, w - 4, h);
             
-            // Accent Line
-            ctx.strokeStyle = '#6ca082'; // Accent Green
+            ctx.strokeStyle = '#6ca082'; 
             ctx.lineWidth = 2;
             ctx.strokeRect(x + 5, y - h + 5, w - 10, h - 10);
-
-            // Handle
+            
             ctx.beginPath();
             ctx.moveTo(x + w/2, y - h);
             ctx.lineTo(x + w/2, y - h - 50);
@@ -500,7 +494,6 @@
             const w = state.container.w;
             const h = 600;
 
-            // Walls
             ctx.strokeStyle = '#555';
             ctx.lineWidth = 6;
             ctx.beginPath();
@@ -510,7 +503,6 @@
             ctx.lineTo(x+w, y);
             ctx.stroke();
 
-            // Glass Shine
             const grad = ctx.createLinearGradient(x, 0, x+w, 0);
             grad.addColorStop(0, 'rgba(255,255,255,0.1)');
             grad.addColorStop(0.5, 'rgba(255,255,255,0.0)');
@@ -529,7 +521,7 @@
 
             const tRatio = (state.T - 100) / 500;
             const alpha = 0.2 + tRatio * 0.8;
-            ctx.fillStyle = `rgba(220, 50, 50, ${alpha})`; // Red Glow
+            ctx.fillStyle = `rgba(220, 50, 50, ${alpha})`;
             
             ctx.beginPath();
             for(let i=0; i<w-60; i+=12) {
@@ -538,7 +530,6 @@
             ctx.fill();
         }
 
-        // --- INTERACTION ---
         function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
             return { x: e.clientX - rect.left, y: e.clientY - rect.top };
@@ -560,7 +551,6 @@
         window.addEventListener('mousemove', e => {
             const m = getMousePos(e);
             
-            // Cursor
             const pY = state.pistonY;
             const pX = state.container.x;
             const pW = state.container.w;
@@ -601,6 +591,13 @@
         }
 
         function checkAnswer() {
+            const attemptsLeft = parseInt(document.body.dataset.attemptsLeft) || 0;
+            if (attemptsLeft <= 0) {
+                document.getElementById('final-best-score').innerText = '0';
+                document.getElementById('attempts-over-modal').classList.add('show');
+                return;
+            }
+
             const userN = parseFloat(els.inpAns.value);
             const modal = document.getElementById('res-modal');
             const gradeEl = document.getElementById('mod-grade');
@@ -627,12 +624,11 @@
 
             gradeEl.innerText = score;
             msgEl.innerText = text;
-            // Do not show correct answer — only show score
+
             errEl.innerText = '';
             modal.classList.remove('hidden');
             modal.classList.add('show');
 
-            // Send score to server
             const csrfToken = getCookie('csrftoken');
             const payload = {
                 lab_id: document.body.dataset.labId,
@@ -653,15 +649,14 @@
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    // update attempts-left attribute
                     document.body.dataset.attemptsLeft = data.attempts_left;
+                    document.getElementById('hud-attempts').innerText = data.attempts_left;
                 } else {
                     console.error('Submit error', data);
                 }
             }).catch(err => console.error('Network error', err));
         }
 
-        // Ensure modal close button works and clicking overlay closes modal
         document.getElementById('modal-close').addEventListener('click', function() {
             document.getElementById('res-modal').classList.remove('show');
         });
@@ -670,6 +665,9 @@
                 if (e.target === this) this.classList.remove('show');
             });
         });
+
+        const initialAttempts = parseInt(document.body.dataset.attemptsLeft) || 0;
+        document.getElementById('hud-attempts').innerText = initialAttempts;
 
         init();
     </script>

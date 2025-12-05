@@ -1,4 +1,3 @@
-
 import os
 import django
 
@@ -13,13 +12,12 @@ from django.core.management import call_command
 
 try:
     try:
-        print("Запускаю автоматические миграции: makemigrations -> migrate...")
         call_command('makemigrations', interactive=False)
         call_command('migrate', interactive=False)
         print("Міграції виконані успішно.")
     except Exception as me:
-        print("Не удалось автоматически выполнить миграции:", me)
-        print("Выполните миграции вручную и запустите скрипт снова:")
+        print("Не вдалося автоматично виконати міграції: ", me)
+        print("Спробуйте самостійно:")
         print("  python manage.py makemigrations")
         print("  python manage.py migrate")
         raise
@@ -39,6 +37,23 @@ try:
     )
     print(f"Лаба додана: {lab.title} (ID: {lab.id})")
 
+    optics = Lab.objects.create(
+        title="Оптика",
+        description=(
+            "Лабораторна робота: Закон відбиття світла. "
+            "Налаштуйте кут дзеркала та кут падаючого променя, спостерігайте відбитий промінь. "
+            "Обчисліть кут відбиття γ, дотримуючись закону відбиття (кут падіння = кут відбиття). "
+            "Інтерактивна симуляція показує дзеркало, падаючий та відбитий промені, нормаль та всі необхідні кути."
+        ),
+        order=2,
+        passing_mark=60,
+        max_mark=100,
+        max_attempts=5,
+        deadline=timezone.now() + timedelta(days=30),
+        is_active=True,
+    )
+    print(f"Лаба додана: {optics.title} (ID: {optics.id})")
+
     thermo = Lab.objects.create(
         title="Термодинаміка",
         description=(
@@ -46,7 +61,7 @@ try:
             "Керуйте об'ємом і температурою, виміряйте тиск і обчисліть кількість речовини n за законом ідеального газу (pV = nRT). "
             "Інтерактивна симуляція містить поршень, індикатори тиску/об'єму/температури і поле для введення n."
         ),
-        order=2,
+        order=3,
         passing_mark=50,
         max_mark=100,
         max_attempts=5,
@@ -66,3 +81,4 @@ except DBError as e:
     print("  python manage.py migrate")
     print("Після успішних міграцій запустіть цей скрипт знову:")
     print("  python setup_lab.py")
+    
