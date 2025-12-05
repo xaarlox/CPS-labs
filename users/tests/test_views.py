@@ -240,3 +240,4 @@ class EditAccountViewTest(TestCase):
         mock_messages.success.assert_called_once()
 
 
+

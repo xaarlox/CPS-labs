@@ -102,3 +102,4 @@ class ProfileModelTest(TestCase):
         self.assertIsNone(profile2.social_github)
 
 
+

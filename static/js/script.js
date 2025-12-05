@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const profileContent = document.getElementById("profile-content");
   const accountContent = document.getElementById("account-content");
   const teacherContent = document.getElementById("teacher-content");
+  const performanceContent = document.getElementById("performance-content");
 
   function showSection(targetSection) {
     if (profileContent)
@@ -60,14 +61,21 @@ document.addEventListener("DOMContentLoaded", function () {
     if (teacherContent)
       teacherContent.style.display =
         targetSection === "teacher" ? "block" : "none";
+    if (performanceContent)
+      performanceContent.style.display =
+        targetSection === "performance" ? "block" : "none";
   }
 
   navLinks.forEach((link) => {
     link.addEventListener("click", function (e) {
+      const target = this.getAttribute("data-section");
+      if (!target) {
+        // лінки без data-section ведуть на інші сторінки
+        return;
+      }
       e.preventDefault();
       navLinks.forEach((nav) => nav.classList.remove("active"));
       this.classList.add("active");
-      const target = this.getAttribute("data-section");
       showSection(target);
     });
   });

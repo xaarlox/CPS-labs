@@ -60,6 +60,7 @@
                 <a href="#" data-section="account">Налаштування акаунту</a>
                 {% if user.profile.is_admin %}
                   <a href="#" data-section="teacher">Перегляд учасників</a>
+                  <a href="#" data-section="performance">Успішність студентів</a>
                 {% endif %}
             </nav>
         </aside>
@@ -296,6 +297,68 @@
 
                 {% if not grouped_students and not admins and not unknown_users %}
                     <p>Користувачів поки що немає.</p>
+                {% endif %}
+            </div>
+
+            <div id="performance-content" class="content-area" style="display: none">
+                <h2 class="settings-header">Успішність студентів</h2>
+
+                {% if performance_groups and labs_for_performance %}
+                    {% for group, rows in performance_groups %}
+                        <section class="form-section">
+                            <h3 class="section-title">Група {{ group.name }}</h3>
+                            <table class="user-list-table">
+                                <thead>
+                                <tr>
+                                    <th>ПІБ</th>
+                                    <th>
+                                        {% if labs_for_performance|length > 0 %}
+                                            {{ labs_for_performance.0.title }}
+                                        {% else %}
+                                            Лаба 1
+                                        {% endif %}
+                                    </th>
+                                    <th>
+                                        {% if labs_for_performance|length > 1 %}
+                                            {{ labs_for_performance.1.title }}
+                                        {% else %}
+                                            Лаба 2
+                                        {% endif %}
+                                    </th>
+                                    <th>
+                                        {% if labs_for_performance|length > 2 %}
+                                            {{ labs_for_performance.2.title }}
+                                        {% else %}
+                                            Лаба 3
+                                        {% endif %}
+                                    </th>
+                                    <th>Спроби (1 лаба)</th>
+                                    <th>Спроби (2 лаба)</th>
+                                    <th>Спроби (3 лаба)</th>
+                                    <th>Дії</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for row in rows %}
+                                    <tr>
+                                        <td>{{ row.student.name|default:row.student.username }}</td>
+                                        <td>{{ row.mark1 }}</td>
+                                        <td>{{ row.mark2 }}</td>
+                                        <td>{{ row.mark3 }}</td>
+                                        <td>{{ row.attempts1 }}</td>
+                                        <td>{{ row.attempts2 }}</td>
+                                        <td>{{ row.attempts3 }}</td>
+                                        <td>
+                                            <a href="{% url 'admin-edit-attempts' row.student.id %}" class="btn-small">Редагувати спроби</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </section>
+                    {% endfor %}
+                {% else %}
+                    <p>Дані про успішність наразі недоступні.</p>
                 {% endif %}
             </div>
             {% endif %}

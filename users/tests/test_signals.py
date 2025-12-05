@@ -53,3 +53,4 @@ class SignalsTest(TestCase):
         self.assertFalse(User.objects.filter(id=user_id).exists())
 
 
+
