@@ -554,7 +554,7 @@
             let score = 0;
             let text = 'Невірно';
 
-            if (diff <= 1) { score = 100; text = 'Ідеально'; }
+            if (diff < 1) { score = 100; text = 'Ідеально'; }
             else if (diff <= 3) { score = 95; text = 'Правильно'; }
             else if (diff <= 6) { score = 80; text = 'Добре'; }
             else if (diff <= 12) { score = 60; text = 'Погано'; }
