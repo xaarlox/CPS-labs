@@ -1,0 +1,750 @@
+/* Імпорт шрифту Kharkiv Tone */
+@font-face {
+    font-family: 'Kharkiv Tone';
+    src: url('../fonts/Kharkiv Tone 04.10.2020.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Переконуємось що контейнер не конфліктує з footer */
+.main,
+.section_main {
+    position: relative;
+    z-index: 1;
+}
+
+/* Контейнер опитування */
+.ipze-poll-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0;
+    min-height: 500px;
+    font-family: 'Kharkiv Tone', Arial, sans-serif;
+    position: relative;
+    z-index: 100;
+    clear: both;
+}
+
+/* Екрани */
+.ipze-screen {
+    display: none;
+    animation: slideIn 0.4s ease;
+}
+
+.ipze-screen.active {
+    display: block;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ============================================
+   ТИТУЛЬНА СТОРІНКА
+   ============================================ */
+
+.ipze-welcome-screen {
+    background: #F2CA10;
+    border-radius: 0;
+    padding: 60px 40px;
+    box-shadow: none;
+    text-align: center;
+    position: relative;
+    z-index: 100;
+}
+
+.ipze-welcome-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Гарантируем, что описание опитування будет чёрным, даже если тема переопределяет стили */
+.ipze-welcome-screen .ipze-poll-description,
+.ipze-welcome-screen .ipze-poll-description * {
+    color: #000000 !important;
+}
+
+.ipze-poll-title {
+    color: #000000;
+    font-size: 42px;
+    font-weight: 900;
+    margin-bottom: 25px;
+    line-height: 1.2;
+    text-shadow: none;
+}
+
+.ipze-poll-description {
+    color: #000000;
+    font-size: 20px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+.ipze-poll-description p {
+    color: #000000;
+    margin: 15px 0;
+}
+
+.ipze-poll-description strong,
+.ipze-poll-description b {
+    font-weight: bold;
+    color: #000000;
+}
+
+.ipze-poll-description em,
+.ipze-poll-description i {
+    font-style: italic;
+    color: #000000;
+}
+
+.ipze-poll-description ul,
+.ipze-poll-description ol {
+    color: #000000;
+    margin: 15px 0;
+    padding-left: 30px;
+}
+
+.ipze-poll-description ul {
+    list-style-type: disc;
+}
+
+.ipze-poll-description ol {
+    list-style-type: decimal;
+}
+
+.ipze-poll-description li {
+    color: #000000;
+    margin: 5px 0;
+}
+
+.ipze-poll-info {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.ipze-info-item {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 15px 30px;
+    border-radius: 0;
+    color: #000000;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: none;
+}
+
+.ipze-info-icon {
+    font-size: 24px;
+    display: none;
+}
+
+.ipze-start-btn {
+    background: #000000;
+    color: #FFFFFF;
+    border: none;
+    padding: 20px 60px;
+    font-size: 22px;
+    font-weight: bold;
+    border-radius: 0;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    box-shadow: none;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.ipze-start-btn:hover {
+    background: #1a1a1a;
+}
+
+.ipze-start-btn:active {
+    background: #000000;
+}
+
+/* ============================================
+   ПРОГРЕС БАР
+   ============================================ */
+
+.ipze-progress-container {
+    margin-bottom: 25px;
+    background: white;
+    padding: 20px;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.ipze-progress-bar {
+    height: 12px;
+    background: #e0e0e0;
+    border-radius: 0;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.ipze-progress-fill {
+    height: 100%;
+    background: #000000;
+    border-radius: 0;
+    transition: width 0.4s ease;
+    box-shadow: none;
+}
+
+.ipze-progress-text {
+    text-align: center;
+    color: #000000;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.ipze-progress-text #current-question {
+    color: #000000;
+    font-weight: bold;
+}
+
+/* ============================================
+   ПИТАННЯ
+   ============================================ */
+
+.ipze-question-screen {
+    background: #F2CA10;
+    border-radius: 0;
+    padding: 20px;
+    box-shadow: none;
+    position: relative;
+    z-index: 100;
+}
+
+.ipze-question-content {
+    background: white;
+    padding: 30px;
+    border-radius: 0;
+    box-shadow: none;
+    position: relative;
+    z-index: 100;
+}
+
+/* Кнопки: белый текст и фирменный шрифт Kharkiv Tone */
+.ipze-start-btn,
+.ipze-nav-btn {
+    color: #FFFFFF !important;
+    font-family: 'Kharkiv Tone', Arial, sans-serif;
+}
+
+.ipze-question-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.ipze-question-text {
+    color: #000000;
+    font-size: 26px;
+    font-weight: bold;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* ============================================
+   ВАРІАНТИ ВІДПОВІДЕЙ
+   ============================================ */
+
+.ipze-options {
+    margin-bottom: 30px;
+}
+
+.ipze-option {
+    display: flex;
+    align-items: center;
+    padding: 20px 25px;
+    background: #f9f9f9;
+    border: 3px solid #e0e0e0;
+    border-radius: 0;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ipze-option:hover {
+    border-color: #000000;
+}
+
+.ipze-option input[type="radio"],
+.ipze-option input[type="checkbox"] {
+    display: none;
+    pointer-events: none;
+}
+
+.ipze-option-text {
+    color: #000000;
+    font-size: 18px;
+    font-weight: 500;
+    flex: 1;
+}
+
+.ipze-option-check {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #000000;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    background: white;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.ipze-option input:checked ~ .ipze-option-check {
+    background: #000000;
+    color: #F2CA10;
+}
+
+.ipze-option input:checked ~ .ipze-option-text {
+    color: #000000;
+    font-weight: bold;
+}
+
+.ipze-option.checked {
+    background: #ffffff;
+    border-color: #000000;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+
+.ipze-option.checked .ipze-option-check {
+    background: #000000;
+    color: #F2CA10;
+}
+
+.ipze-option.checked .ipze-option-text {
+    color: #000000;
+    font-weight: bold;
+}
+
+.ipze-option-checkbox .ipze-option-check {
+    border-radius: 0;
+}
+
+/* Текстове поле */
+.ipze-text-input {
+    width: 100%;
+    padding: 20px;
+    border: 3px solid #e0e0e0;
+    border-radius: 0;
+    font-size: 18px;
+    color: #000000;
+    background: #f9f9f9;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.ipze-text-input:focus {
+    outline: none;
+    border-color: #000000;
+    background: white;
+    box-shadow: none;
+}
+
+.ipze-text-input::placeholder {
+    color: #999;
+}
+
+.ipze-hint {
+    color: #666;
+    font-size: 14px;
+    margin-top: 10px;
+    font-style: italic;
+    text-align: center;
+}
+
+/* ============================================
+   НАВІГАЦІЯ
+   ============================================ */
+
+.ipze-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 30px;
+    position: relative;
+    z-index: 101;
+}
+
+.ipze-nav-btn {
+    padding: 15px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    flex: 1;
+}
+
+.ipze-prev-btn {
+    background: #000000;
+    color: #FFFFFF;
+    border: none;
+}
+
+.ipze-prev-btn:hover {
+    background: #1a1a1a;
+}
+
+.ipze-next-btn {
+    background: #000000;
+    color: #FFFFFF;
+    box-shadow: none;
+}
+
+.ipze-next-btn:hover {
+    background: #1a1a1a;
+}
+
+.ipze-submit-btn {
+    background: #000000;
+    color: #FFFFFF;
+    box-shadow: none;
+}
+
+.ipze-submit-btn:hover {
+    background: #1a1a1a;
+}
+
+/* ============================================
+   ЕКРАН УСПІХУ
+   ============================================ */
+
+.ipze-success-screen {
+    background: #F2CA10;
+    border-radius: 0;
+    padding: 80px 40px;
+    text-align: center;
+    box-shadow: none;
+    position: relative;
+    z-index: 100;
+}
+
+.ipze-success-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 0;
+    background: #000000;
+    color: #F2CA10;
+    font-size: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    font-weight: bold;
+    animation: successZoom 0.5s ease;
+}
+
+@keyframes successZoom {
+    0% { 
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% { 
+        transform: scale(1.1);
+    }
+    100% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.ipze-success-screen h2 {
+    color: #000000;
+    font-size: 36px;
+    margin-bottom: 15px;
+}
+
+.ipze-success-screen p {
+    color: #000000;
+    font-size: 20px;
+    opacity: 0.9;
+}
+
+/* ============================================
+   АДАПТИВНІСТЬ ДЛЯ ПЛАНШЕТІВ
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .ipze-poll-container {
+        margin: 20px;
+    }
+
+    .ipze-poll-title {
+        font-size: 36px;
+    }
+
+    .ipze-question-screen {
+        padding: 30px;
+    }
+
+    .ipze-question-content {
+        padding: 30px;
+    }
+}
+
+/* ============================================
+   АДАПТИВНІСТЬ ДЛЯ МОБІЛЬНИХ (768px і менше)
+   ============================================ */
+
+@media (max-width: 768px) {
+    .ipze-poll-container {
+        margin: 10px;
+        padding: 0;
+    }
+
+    /* Титульна сторінка */
+    .ipze-welcome-screen {
+        padding: 40px 20px;
+    }
+
+    .ipze-poll-title {
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
+    .ipze-poll-description {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .ipze-poll-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .ipze-info-item {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
+    .ipze-start-btn {
+        padding: 16px 40px;
+        font-size: 18px;
+        width: 100%;
+    }
+
+    /* Прогрес бар */
+    .ipze-progress-container {
+        margin-bottom: 20px;
+        padding: 15px;
+    }
+
+    .ipze-progress-text {
+        font-size: 14px;
+    }
+
+    /* Питання */
+    .ipze-question-screen {
+        padding: 15px;
+    }
+
+    .ipze-question-content {
+        padding: 20px;
+    }
+
+    .ipze-question-text {
+        font-size: 20px;
+        line-height: 1.3;
+    }
+
+    /* Варіанти відповідей */
+    .ipze-option {
+        padding: 15px;
+        margin-bottom: 12px;
+    }
+
+    .ipze-option-text {
+        font-size: 16px;
+    }
+
+    .ipze-option-check {
+        width: 25px;
+        height: 25px;
+        font-size: 16px;
+        border-width: 2px;
+    }
+
+    /* Текстове поле */
+    .ipze-text-input {
+        padding: 15px;
+        font-size: 16px;
+    }
+
+    /* Навігація */
+    .ipze-navigation {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .ipze-nav-btn {
+        width: 100%;
+        padding: 15px 20px;
+        font-size: 16px;
+    }
+
+    /* Екран успіху */
+    .ipze-success-screen {
+        padding: 50px 20px;
+    }
+
+    .ipze-success-icon {
+        width: 80px;
+        height: 80px;
+        font-size: 50px;
+    }
+
+    .ipze-success-screen h2 {
+        font-size: 26px;
+    }
+
+    .ipze-success-screen p {
+        font-size: 16px;
+    }
+}
+
+/* ============================================
+   АДАПТИВНІСТЬ ДЛЯ МАЛИХ ТЕЛЕФОНІВ (480px і менше)
+   ============================================ */
+
+@media (max-width: 480px) {
+    .ipze-poll-container {
+        margin: 5px;
+    }
+
+    .ipze-welcome-screen {
+        padding: 30px 15px;
+    }
+
+    .ipze-poll-title {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    .ipze-poll-description {
+        font-size: 14px;
+    }
+
+    .ipze-start-btn {
+        padding: 14px 30px;
+        font-size: 16px;
+    }
+
+    .ipze-question-screen {
+        padding: 10px;
+    }
+
+    .ipze-question-content {
+        padding: 15px;
+    }
+
+    .ipze-question-text {
+        font-size: 18px;
+    }
+
+    .ipze-option {
+        padding: 12px;
+    }
+
+    .ipze-option-text {
+        font-size: 15px;
+    }
+
+    .ipze-nav-btn {
+        padding: 14px 20px;
+        font-size: 15px;
+    }
+
+    .ipze-success-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 40px;
+    }
+
+    .ipze-success-screen h2 {
+        font-size: 22px;
+    }
+
+    .ipze-success-screen p {
+        font-size: 15px;
+    }
+}
+
+/* ============================================
+   LANDSCAPE ОРІЄНТАЦІЯ НА ТЕЛЕФОНІ
+   ============================================ */
+
+@media (max-width: 896px) and (orientation: landscape) {
+    .ipze-welcome-screen {
+        padding: 30px 20px;
+    }
+
+    .ipze-poll-title {
+        font-size: 24px;
+    }
+
+    .ipze-question-screen {
+        padding: 20px 15px;
+    }
+
+    .ipze-question-content {
+        padding: 20px;
+    }
+
+    .ipze-question-text {
+        font-size: 18px;
+    }
+
+    .ipze-navigation {
+        flex-direction: row;
+    }
+
+    .ipze-nav-btn {
+        padding: 12px 20px;
+    }
+}
+
+/* ============================================
+   ФІКС ДЛЯ iOS Safari
+   ============================================ */
+
+@supports (-webkit-touch-callout: none) {
+    .ipze-poll-container {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .ipze-option {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .ipze-nav-btn {
+        -webkit-appearance: none;
+    }
+}

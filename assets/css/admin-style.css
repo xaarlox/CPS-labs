@@ -1,0 +1,275 @@
+/* Загальні стилі для метабоксу опитування */
+#ipze-questions-wrapper {
+    margin-bottom: 20px;
+}
+
+.ipze-empty-state {
+    text-align: center;
+    padding: 40px;
+    background: #f9f9f9;
+    border: 2px dashed #ccc;
+    color: #666;
+    font-size: 16px;
+}
+
+/* Блок питання */
+.ipze-question-block {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.ipze-question-block:hover {
+    border-color: #999;
+}
+
+/* Заголовок питання */
+.ipze-question-header {
+    background: #f0f0f1;
+    color: #2c3338;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: move;
+    border-bottom: 1px solid #ccd0d4;
+}
+
+.ipze-drag-handle {
+    font-size: 18px;
+    cursor: move;
+    opacity: 0.5;
+    color: #2c3338;
+}
+
+.ipze-drag-handle:hover {
+    opacity: 1;
+}
+
+.ipze-question-number {
+    font-weight: 600;
+    font-size: 14px;
+    padding: 4px 10px;
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    color: #2c3338;
+}
+
+.ipze-question-preview {
+    flex: 1;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #2c3338;
+}
+
+.ipze-question-type-badge {
+    font-size: 12px;
+    padding: 4px 10px;
+    background: #fff;
+    color: #646970;
+    border: 1px solid #ccd0d4;
+    font-weight: 400;
+}
+
+.ipze-toggle-edit {
+    flex-shrink: 0;
+}
+
+/* Тіло питання */
+.ipze-question-body {
+    padding: 20px;
+    background: #fff;
+    display: none;
+}
+
+/* Форма */
+.ipze-form-group {
+    margin-bottom: 20px;
+}
+
+.ipze-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #1d2327;
+    font-size: 14px;
+}
+
+.ipze-input-full,
+.ipze-question-type-select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #8c8f94;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.ipze-input-full:focus,
+.ipze-question-type-select:focus {
+    outline: none;
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+/* Варіанти відповідей */
+.ipze-options-box {
+    background: #f9f9f9;
+    padding: 15px;
+    border: 1px solid #ccd0d4;
+    margin-bottom: 15px;
+}
+
+.ipze-options-list {
+    margin: 10px 0;
+}
+
+.ipze-option-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.ipze-option-number {
+    font-weight: 600;
+    color: #2c3338;
+    min-width: 25px;
+}
+
+.ipze-option-item input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #8c8f94;
+    font-size: 14px;
+}
+
+.ipze-option-item input:focus {
+    outline: none;
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.ipze-remove-option {
+    flex-shrink: 0;
+    display: inline-block;
+    background: #ffffff;
+    color: #2271b1;
+    border: 1px solid #2271b1;
+    padding: 6px 10px;
+    font-size: 13px;
+    line-height: 1;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: none;
+}
+.ipze-remove-option:hover {
+    background: #f0f6fc;
+}
+
+/* Стили для кнопки удаления вопроса в блоке (больше, если используется) */
+.ipze-remove-question {
+    background: #ffffff;
+    color: #2271b1;
+    border: 1px solid #2271b1;
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.ipze-remove-question:hover {
+    background: #f0f6fc;
+}
+
+.ipze-add-option {
+    margin-top: 10px;
+}
+
+/* Дії з питанням */
+.ipze-question-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 15px;
+    border-top: 1px solid #dcdcde;
+}
+
+.ipze-remove-question {
+    margin-right: auto;
+}
+
+/* Кнопка додавання питання */
+#ipze-add-question {
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Сортування */
+.ui-sortable-helper {
+    opacity: 0.8;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.ui-sortable-placeholder {
+    border: 2px dashed #2271b1;
+    background: #f0f6fc;
+    visibility: visible !important;
+    height: 60px;
+}
+
+/* Результати опитування */
+.ipze-results-section {
+    margin-bottom: 30px;
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+}
+
+.ipze-results-section h4 {
+    color: #1d2327;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dcdcde;
+}
+
+.ipze-chart-container {
+    margin: 20px 0;
+    max-width: 600px;
+}
+
+.ipze-text-answers {
+    max-height: 300px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    padding: 15px;
+    border: 1px solid #ccd0d4;
+}
+
+.ipze-text-answers li {
+    padding: 8px 0;
+    border-bottom: 1px solid #dcdcde;
+}
+
+.ipze-text-answers li:last-child {
+    border-bottom: none;
+}
+
+.ipze-summary-stats {
+    background: #f0f6fc;
+    color: #1d2327;
+    padding: 15px 20px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    border: 1px solid #c3e0f5;
+}
+
+/* Скриваємо пермалінк для опитувань */
+.post-type-ipze_poll #edit-slug-box,
+.post-type-ipze_poll #preview-action {
+    display: none !important;
+}

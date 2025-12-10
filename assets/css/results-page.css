@@ -1,0 +1,184 @@
+/* Загальні стилі сторінки результатів */
+.ipze-results-wrap {
+    max-width: 1200px;
+}
+
+.ipze-poll-selector {
+    background: #fff;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #ccd0d4;
+}
+
+.ipze-poll-selector label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.ipze-poll-selector select {
+    width: 100%;
+    max-width: 500px;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid #8c8f94;
+}
+
+.ipze-poll-selector select:focus {
+    border-color: #2271b1;
+    outline: none;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+/* Контейнер результатів */
+.ipze-results-container {
+    background: #fff;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #ccd0d4;
+}
+
+.ipze-results-container h2 {
+    margin-top: 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #dcdcde;
+    color: #1d2327;
+    font-size: 23px;
+}
+
+/* Загальна статистика */
+.ipze-summary {
+    display: flex;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.ipze-summary-card {
+    flex: 1;
+    background: #f0f6fc;
+    padding: 30px 20px;
+    text-align: center;
+    border: 1px solid #c3e0f5;
+}
+
+.ipze-summary-number {
+    font-size: 48px;
+    font-weight: bold;
+    color: #2271b1;
+    margin-bottom: 5px;
+}
+
+.ipze-summary-label {
+    font-size: 14px;
+    color: #646970;
+    font-weight: 500;
+}
+
+/* Блок з результатами питання */
+.ipze-question-results {
+    margin: 40px 0;
+    padding: 25px;
+    background: #fafafa;
+    border: 1px solid #dcdcde;
+}
+
+.ipze-question-results h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #1d2327;
+    font-size: 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #2271b1;
+}
+
+.ipze-question-type-label {
+    color: #646970;
+    font-size: 13px;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.ipze-response-count {
+    background: #f0f6fc;
+    padding: 12px 15px;
+    margin: 20px 0;
+    border-left: 4px solid #2271b1;
+    color: #1d2327;
+    font-size: 14px;
+}
+
+.ipze-response-count strong {
+    color: #2271b1;
+    font-size: 16px;
+}
+
+.ipze-no-data {
+    text-align: center;
+    padding: 30px;
+    color: #646970;
+    background: #fff;
+    border: 1px dashed #ccd0d4;
+    font-style: italic;
+}
+
+/* Діаграма */
+.ipze-chart-wrapper {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ccd0d4;
+}
+
+/* Таблиця статистики */
+.ipze-stats-table {
+    margin-top: 20px;
+}
+
+.ipze-progress-bar-wrapper {
+    background: #dcdcde;
+    height: 30px;
+    position: relative;
+    overflow: visible;
+}
+
+.ipze-progress-bar-fill {
+    background: #2271b1;
+    height: 100%;
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.ipze-progress-text {
+    position: absolute;
+    top: 50%;
+    right: -45px;
+    transform: translateY(-50%);
+    color: #1d2327;
+    font-weight: bold;
+    font-size: 14px;
+    z-index: 2;
+    white-space: nowrap;
+}
+
+/* Текстові відповіді */
+.ipze-text-responses {
+    margin-top: 20px;
+}
+
+.ipze-text-responses table {
+    margin-top: 0;
+}
+
+/* Адаптивність */
+@media (max-width: 768px) {
+    .ipze-summary {
+        flex-direction: column;
+    }
+    
+    .ipze-chart-wrapper {
+        padding: 10px;
+    }
+}
