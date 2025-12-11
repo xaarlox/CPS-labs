@@ -48,7 +48,7 @@ def lab(request, pk):
 @login_required(login_url='login')
 def cps_simulation(request, pk):
     """
-    Вьюха для лабораторної роботи з фізики
+    В'ю для лабораторної роботи з фізики
     Вибирає шаблон залежно від типу симуляції
     """
     lab = get_object_or_404(Lab, id=pk)

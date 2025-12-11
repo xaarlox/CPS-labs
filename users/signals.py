@@ -31,8 +31,13 @@ def updateUser(sender, instance, created, **kwargs):
 
 
 def deleteUser(sender, instance, **kwargs):
-    user = instance.user
-    user.delete()
+    user_id = instance.user_id
+    if not user_id:
+        return
+    # Уникаємо звернення через instance.user, бо користувач міг бути вже видалений каскадом
+    existing = User.objects.filter(id=user_id)
+    if existing.exists():
+        existing.delete()
 
 
 post_save.connect(createProfile, sender=User)
